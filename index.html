@@ -11,180 +11,96 @@
 
     <style>
       :root {
-        --rail: #161c26;
-        --rail-line: #29313d;
-        --rail-text: #aab4c1;
-        --rail-dim: #6c7889;
-        --canvas: #f4f6f8;
-        --surface: #ffffff;
-        --ink: #1b2430;
-        --muted: #67727f;
-        --line: #e3e7ec;
-        --line-soft: #eef1f4;
-        --accent: #2f6fb0;
-        --accent-ink: #245a92;
-        --accent-soft: #e9f1f9;
-        --positive: #2f7d5f;
-        --positive-soft: #e3f0e9;
-        --warn: #9a6a20;
-        --warn-soft: #f6ecd8;
+        --rail: #161c26; --rail-line: #29313d; --rail-text: #aab4c1; --rail-dim: #6c7889;
+        --canvas: #f4f6f8; --surface: #ffffff; --ink: #1b2430; --muted: #67727f;
+        --line: #e3e7ec; --line-soft: #eef1f4;
+        --accent: #2f6fb0; --accent-ink: #245a92; --accent-soft: #e9f1f9;
+        --positive: #2f7d5f; --positive-soft: #e3f0e9; --warn: #9a6a20; --warn-soft: #f6ecd8;
       }
-
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body, #root { height: 100%; }
-
-      body {
-        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-        background: var(--canvas);
-        color: var(--ink);
-        -webkit-font-smoothing: antialiased;
-        font-size: 14px;
-      }
-
+      body { font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; background: var(--canvas); color: var(--ink); -webkit-font-smoothing: antialiased; font-size: 14px; }
       button { cursor: pointer; border: none; font-family: inherit; background: none; color: inherit; }
       input, select { font-family: inherit; outline: none; color: var(--ink); }
       input::placeholder { color: #9aa4b0; }
       input:focus, select:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-soft); }
       table { border-spacing: 0; }
       .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-      .num { font-variant-numeric: tabular-nums; }
 
-      /* ---- Shell -------------------------------------------------------- */
       .app { display: flex; min-height: 100%; }
-
-      .rail {
-        width: 236px; flex-shrink: 0;
-        background: var(--rail); color: var(--rail-text);
-        display: flex; flex-direction: column;
-        position: sticky; top: 0; height: 100vh;
-      }
+      .rail { width: 236px; flex-shrink: 0; background: var(--rail); color: var(--rail-text); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
       .brand { padding: 22px 20px 18px; border-bottom: 1px solid var(--rail-line); }
-      .brand-mark {
-        font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
-        color: var(--rail-dim); font-weight: 600;
-      }
-      .brand-name {
-        font-size: 21px; font-weight: 700; color: #fff; margin-top: 5px;
-        letter-spacing: -0.01em; line-height: 1.05;
-      }
-      .brand-tally {
-        margin-top: 14px; display: flex; align-items: baseline; gap: 7px;
-      }
+      .brand-mark { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--rail-dim); font-weight: 600; }
+      .brand-name { font-size: 21px; font-weight: 700; color: #fff; margin-top: 5px; letter-spacing: -0.01em; line-height: 1.05; }
+      .brand-tally { margin-top: 14px; display: flex; align-items: baseline; gap: 7px; }
       .brand-tally b { font-size: 20px; color: #fff; font-weight: 600; }
       .brand-tally span { font-size: 11px; color: var(--rail-dim); text-transform: uppercase; letter-spacing: 0.08em; }
-
       .nav { padding: 12px 12px; display: flex; flex-direction: column; gap: 2px; }
-      .nav-item {
-        display: flex; align-items: center; gap: 11px;
-        padding: 9px 12px; border-radius: 7px; font-size: 13.5px; font-weight: 500;
-        color: var(--rail-text); border-left: 2px solid transparent; text-align: left; width: 100%;
-        transition: background .12s ease, color .12s ease;
-      }
+      .nav-item { display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 7px; font-size: 13.5px; font-weight: 500; color: var(--rail-text); text-align: left; width: 100%; transition: background .12s ease, color .12s ease; }
       .nav-item:hover { background: rgba(255,255,255,0.045); color: #e7ebf0; }
       .nav-item.active { background: rgba(47,111,176,0.16); color: #fff; }
-      .nav-item .badge {
-        margin-left: auto; font-size: 11px; color: var(--rail-dim);
-        font-family: "IBM Plex Mono", monospace;
-      }
+      .nav-item .badge { margin-left: auto; font-size: 11px; color: var(--rail-dim); font-family: "IBM Plex Mono", monospace; }
       .nav-item.active .badge { color: #cddcec; }
-
-      .rail-foot {
-        margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--rail-line);
-        font-size: 11px; color: var(--rail-dim); line-height: 1.55;
-      }
-      .rail-foot button {
-        color: var(--rail-text); font-size: 12px; display: inline-flex; align-items: center;
-        gap: 6px; margin-bottom: 10px; font-weight: 500;
-      }
-      .rail-foot button:hover { color: #fff; }
+      .rail-foot { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--rail-line); font-size: 11px; color: var(--rail-dim); line-height: 1.55; }
+      .sync { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--rail-dim); margin-bottom: 9px; }
+      .dot { width: 7px; height: 7px; border-radius: 50%; background: #4b9e78; box-shadow: 0 0 0 3px rgba(75,158,120,0.18); }
+      .dot.off { background: #b06b4c; box-shadow: 0 0 0 3px rgba(176,107,76,0.18); }
 
       .workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-
-      /* ---- Toolbar ------------------------------------------------------ */
-      .toolbar {
-        display: flex; align-items: center; gap: 16px;
-        padding: 18px 26px; border-bottom: 1px solid var(--line);
-        background: var(--surface);
-      }
+      .toolbar { display: flex; align-items: center; gap: 16px; padding: 18px 26px; border-bottom: 1px solid var(--line); background: var(--surface); }
       .toolbar h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
       .toolbar .sub { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
       .toolbar-actions { margin-left: auto; display: flex; gap: 8px; }
-
-      .btn {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 8px 13px; border-radius: 7px; font-size: 13px; font-weight: 550;
-      }
+      .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: 7px; font-size: 13px; font-weight: 550; }
       .btn-primary { background: var(--accent); color: #fff; }
       .btn-primary:hover { background: var(--accent-ink); }
       .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
       .btn-ghost:hover { background: var(--canvas); border-color: #cfd6de; }
-
-      .search {
-        display: flex; align-items: center; gap: 8px; flex: 1; max-width: 340px;
-        padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
-      }
+      .search { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 340px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
       .search input { border: none; flex: 1; font-size: 13.5px; background: none; }
       .search input:focus { box-shadow: none; }
-      .filter {
-        padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px;
-        background: var(--surface); font-size: 13px; font-weight: 500; color: var(--ink);
-      }
+      .filter { padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: 13px; font-weight: 500; color: var(--ink); }
 
-      /* ---- Metrics strip ------------------------------------------------ */
-      .metrics {
-        display: flex; flex-wrap: wrap; align-items: stretch;
-        padding: 0 26px; border-bottom: 1px solid var(--line); background: var(--surface);
-      }
+      .metrics { display: flex; flex-wrap: wrap; padding: 0 26px; border-bottom: 1px solid var(--line); background: var(--surface); }
       .metric { padding: 13px 26px 13px 0; margin-right: 26px; border-right: 1px solid var(--line-soft); }
       .metric:last-child { border-right: none; margin-right: 0; padding-right: 0; }
       .metric .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; }
       .metric .v { font-size: 19px; font-weight: 600; margin-top: 3px; letter-spacing: -0.01em; }
 
-      /* ---- Content ------------------------------------------------------ */
       .content { padding: 22px 26px 40px; }
-
       .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; }
       .panel-head { padding: 15px 18px 13px; border-bottom: 1px solid var(--line-soft); }
       .panel-head h3 { font-size: 14.5px; font-weight: 600; }
       .panel-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
       .panel-body { padding: 16px 18px; }
 
-      /* ---- Ledger table ------------------------------------------------- */
       .ledger { width: 100%; border-collapse: collapse; }
-      .ledger thead th {
-        text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
-        color: var(--muted); font-weight: 600; padding: 0 14px 11px; white-space: nowrap;
-        border-bottom: 1px solid var(--line); background: var(--surface);
-      }
+      .ledger thead th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; padding: 0 14px 11px; white-space: nowrap; border-bottom: 1px solid var(--line); background: var(--surface); }
       .ledger tbody td { padding: 11px 14px; border-bottom: 1px solid var(--line-soft); font-size: 13.5px; }
       .ledger tbody tr:last-child td { border-bottom: none; }
       .ledger tbody tr:hover td { background: #fafbfc; }
       .r { text-align: right; }
-      .chip {
-        display: inline-block; padding: 3px 9px; border-radius: 6px;
-        font-size: 11.5px; font-weight: 600; white-space: nowrap; letter-spacing: 0.01em;
-      }
+      .chip { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
       .rm { color: #a6afb9; padding: 4px; border-radius: 6px; display: inline-flex; }
       .rm:hover { color: #d0453e; background: #fbe9e8; }
-
       .empty { text-align: center; padding: 44px 20px; color: var(--muted); font-size: 13.5px; }
       .empty b { color: var(--ink); display: block; font-size: 15px; margin-bottom: 4px; font-weight: 600; }
-
       .grid2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
       .grid-cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
 
-      /* ---- Modal -------------------------------------------------------- */
       .scrim { position: fixed; inset: 0; background: rgba(19,26,36,0.5); display: flex; align-items: flex-start; justify-content: center; padding: 7vh 16px; z-index: 50; }
       .modal { background: var(--surface); border-radius: 12px; width: 100%; max-width: 560px; box-shadow: 0 24px 70px rgba(19,26,36,0.35); overflow: hidden; }
       .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line); }
       .modal-head h3 { font-size: 16px; font-weight: 600; }
       .modal-body { padding: 18px 20px; max-height: 62vh; overflow-y: auto; }
       .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--line); background: var(--canvas); }
-
       .field { display: block; margin-bottom: 13px; }
       .field span { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
       .field input, .field select { width: 100%; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); font-size: 13.5px; margin-top: 5px; }
       .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+      .banner { margin: 14px 26px 0; padding: 10px 14px; border-radius: 8px; font-size: 13px; background: #fbe9e8; color: #a4362f; border: 1px solid #f2c9c6; }
+      .loading { padding: 60px 20px; text-align: center; color: var(--muted); }
 
       @media (max-width: 860px) {
         .rail { width: auto; height: auto; position: static; flex-direction: column; }
@@ -206,7 +122,8 @@
         "imports": {
           "react": "https://esm.sh/react@18.3.1",
           "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-          "lucide-react": "https://esm.sh/lucide-react@0.383.0?deps=react@18.3.1"
+          "lucide-react": "https://esm.sh/lucide-react@0.383.0?deps=react@18.3.1",
+          "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4"
         }
       }
     </script>
@@ -216,15 +133,41 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module" data-presets="react">
-      import React, { useState, useEffect, useMemo } from "react";
+      import React, { useState, useEffect, useMemo, useCallback } from "react";
       import { createRoot } from "react-dom/client";
+      import { createClient } from "@supabase/supabase-js";
       import {
         Boxes, LayoutGrid, Archive, Truck, Plus, Ship, Trash2, X,
-        Search, RotateCcw, PoundSterling, ArrowUpRight, ArrowDownRight,
+        Search, PoundSterling, ArrowUpRight, ArrowDownRight,
       } from "lucide-react";
 
       /* ======================================================================
-         Status vocabulary + chip styling (cool, tool-register tones)
+         Supabase — the single source of truth for stock, parcels, collections.
+         The publishable key is safe to ship in a public page; these tables are
+         guarded by row-level security and hold no personal data.
+      ====================================================================== */
+      const SUPABASE_URL = "https://wuzcvgucszxoefcscqkd.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_uD56klle2WOzdHfKHVMEWA_K4YhIQNE";
+      const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // DB (snake_case) <-> app (camelCase)
+      const itemFromRow = (r) => ({
+        id: r.id, product: r.product, collection: r.collection, brand: r.brand, source: r.source,
+        purchase: Number(r.purchase) || 0, inbound: Number(r.inbound) || 0, status: r.status,
+        listPrice: r.list_price == null ? null : Number(r.list_price),
+        salePrice: r.sale_price == null ? null : Number(r.sale_price),
+        saleDate: r.sale_date || null, channel: r.channel, shipment: r.shipment,
+      });
+      const itemToRow = (it) => ({
+        id: it.id, product: it.product, collection: it.collection, brand: it.brand, source: it.source,
+        purchase: it.purchase, inbound: it.inbound, status: it.status,
+        list_price: it.listPrice, sale_price: it.salePrice, sale_date: it.saleDate,
+        channel: it.channel, shipment: it.shipment,
+      });
+      const shipFromRow = (r) => ({ id: r.id, date: r.date, outbound: Number(r.outbound) || 0, customs: Number(r.customs) || 0, note: r.note });
+
+      /* ======================================================================
+         Status vocabulary + chip styling
       ====================================================================== */
       const STATUSES = ["sourced", "in transit", "with rep", "listed", "sold"];
       const STATUS_STYLE = {
@@ -235,34 +178,18 @@
         sold:         { bg: "#e3f0e9", fg: "#2f7d5f" },
       };
 
-      // The collections you're actively completing. These always appear on the
-      // Collections page, even at zero stock, so gaps to fill are visible.
-      const COLLECTIONS = [
-        { name: "V&B Benedikt Greenland",   brand: "Villeroy & Boch" },
-        { name: "V&B Benedikt Animal Park", brand: "Villeroy & Boch" },
-        { name: "V&B Benedikt Automobile",  brand: "Villeroy & Boch" },
-        { name: "V&B Benedikt Wellness",    brand: "Villeroy & Boch" },
-        { name: "V&B Benedikt Sports",      brand: "Villeroy & Boch" },
-      ];
-
       /* ======================================================================
          Formatting
       ====================================================================== */
-      const money = (n) =>
-        (n < 0 ? "-" : "") + "£" +
-        Math.abs(n).toLocaleString("en-GB", { maximumFractionDigits: 0 });
+      const money = (n) => (n < 0 ? "-" : "") + "£" + Math.abs(n).toLocaleString("en-GB", { maximumFractionDigits: 0 });
       const pct = (n) => (n === null || !isFinite(n) ? "—" : Math.round(n) + "%");
 
       /* ======================================================================
-         Landed-cost engine + rollups  (unchanged model)
-         A piece's true cost = purchase + inbound shipping + its share of the
-         parcel it travelled in (outbound + customs), apportioned by value.
+         Landed-cost engine + rollups
       ====================================================================== */
       function enrich(items, shipments) {
         const shipTotals = {};
-        items.forEach((it) => {
-          if (it.shipment) shipTotals[it.shipment] = (shipTotals[it.shipment] || 0) + it.purchase;
-        });
+        items.forEach((it) => { if (it.shipment) shipTotals[it.shipment] = (shipTotals[it.shipment] || 0) + it.purchase; });
         const shipMap = Object.fromEntries(shipments.map((s) => [s.id, s]));
         return items.map((it) => {
           const s = it.shipment ? shipMap[it.shipment] : null;
@@ -271,9 +198,7 @@
             const parcelCost = (s.outbound || 0) + (s.customs || 0);
             const share = shipTotals[it.shipment] ? it.purchase / shipTotals[it.shipment] : 0;
             apportioned = parcelCost * share;
-          } else if (it.status !== "sourced") {
-            estimated = true;
-          }
+          } else if (it.status !== "sourced") { estimated = true; }
           const landed = it.purchase + (it.inbound || 0) + apportioned;
           const sold = it.status === "sold" && it.salePrice != null;
           const profit = sold ? it.salePrice - landed : null;
@@ -281,7 +206,6 @@
           return { ...it, apportioned, landed, sold, profit, margin, estimated };
         });
       }
-
       function rollups(enriched) {
         const sold = enriched.filter((i) => i.sold);
         const stock = enriched.filter((i) => !i.sold);
@@ -292,30 +216,23 @@
         const avgMargin = margins.length ? margins.reduce((a, b) => a + b, 0) / margins.length : null;
         return { revenue, profit, stockValue, inStock: stock.length, soldCount: sold.length, avgMargin };
       }
-
-      // Group realised sales by calendar month (YYYY-MM) using saleDate.
       function byMonth(enriched) {
         const map = {};
         enriched.forEach((i) => {
           if (!i.sold || !i.saleDate) return;
           const key = i.saleDate.slice(0, 7);
           if (!map[key]) map[key] = { key, revenue: 0, profit: 0, count: 0, marginSum: 0, marginN: 0 };
-          map[key].revenue += i.salePrice;
-          map[key].profit += i.profit;
-          map[key].count += 1;
+          map[key].revenue += i.salePrice; map[key].profit += i.profit; map[key].count += 1;
           if (i.margin != null) { map[key].marginSum += i.margin; map[key].marginN++; }
         });
         return map;
       }
       const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const monthLabel = (key) => {
-        const [y, m] = key.split("-").map(Number);
-        return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
-      };
+      const monthLabel = (key) => { const [y, m] = key.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" }); };
 
-      function byCollection(enriched) {
+      function byCollection(enriched, collectionList) {
         const map = {};
-        COLLECTIONS.forEach((c) => { map[c.name] = { name: c.name, brand: c.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 }; });
+        collectionList.forEach((c) => { map[c.name] = { name: c.name, brand: c.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 }; });
         enriched.forEach((i) => {
           const key = i.collection || "Unassigned";
           if (!map[key]) map[key] = { name: key, brand: i.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 };
@@ -326,91 +243,27 @@
       }
 
       /* ======================================================================
-         localStorage persistence
-      ====================================================================== */
-      const KEY = "porcelain-freaks:v1";
-      function load() {
-        try {
-          const raw = localStorage.getItem(KEY);
-          if (!raw) return null;
-          const parsed = JSON.parse(raw);
-          if (!parsed || !parsed.items) return null;
-          return parsed;
-        } catch { return null; }
-      }
-      function save(data) {
-        try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {}
-      }
-
-      /* ======================================================================
-         Seed stock so the register reads as alive on first run
-      ====================================================================== */
-      const SEED = {
-        items: [
-          { id: "VB-GRN-001", product: "Greenland teapot",       collection: "V&B Benedikt Greenland",   brand: "Villeroy & Boch", source: "eBay UK",   purchase: 42, inbound: 6,  status: "listed",     listPrice: 210, salePrice: null, saleDate: null,         channel: null,       shipment: "P-001" },
-          { id: "VB-GRN-002", product: "Greenland sugar bowl",   collection: "V&B Benedikt Greenland",   brand: "Villeroy & Boch", source: "eBay UK",   purchase: 28, inbound: 5,  status: "listed",     listPrice: 150, salePrice: null, saleDate: null,         channel: null,       shipment: "P-001" },
-          { id: "VB-GRN-003", product: "Greenland milk jug",     collection: "V&B Benedikt Greenland",   brand: "Villeroy & Boch", source: "Vinted",    purchase: 22, inbound: 4,  status: "sold",       listPrice: 140, salePrice: 140,  saleDate: "2026-07-05", channel: "Avito",    shipment: "P-001" },
-          { id: "VB-ANP-011", product: "Animal Park cup & saucer", collection: "V&B Benedikt Animal Park", brand: "Villeroy & Boch", source: "eBay UK",  purchase: 24, inbound: 5,  status: "sold",       listPrice: 120, salePrice: 120,  saleDate: "2026-07-18", channel: "Avito",    shipment: "P-001" },
-          { id: "VB-ANP-014", product: "Animal Park plate",      collection: "V&B Benedikt Animal Park", brand: "Villeroy & Boch", source: "Leboncoin", purchase: 18, inbound: 7,  status: "sold",       listPrice: 95,  salePrice: 105,  saleDate: "2026-08-03", channel: "Avito",    shipment: "P-001" },
-          { id: "VB-ANP-015", product: "Animal Park mug",        collection: "V&B Benedikt Animal Park", brand: "Villeroy & Boch", source: "eBay UK",   purchase: 15, inbound: 4,  status: "with rep",   listPrice: 80,  salePrice: null, saleDate: null,         channel: null,       shipment: "P-002" },
-          { id: "VB-AUT-009", product: "Automobile plate",       collection: "V&B Benedikt Automobile",  brand: "Villeroy & Boch", source: "Vinted",    purchase: 20, inbound: 6,  status: "sold",       listPrice: 90,  salePrice: 90,   saleDate: "2026-07-27", channel: "Avito",    shipment: "P-001" },
-          { id: "VB-AUT-031", product: "Automobile teapot",      collection: "V&B Benedikt Automobile",  brand: "Villeroy & Boch", source: "eBay UK",   purchase: 55, inbound: 8,  status: "listed",     listPrice: 260, salePrice: null, saleDate: null,         channel: null,       shipment: "P-002" },
-          { id: "VB-WEL-032", product: "Wellness cup & saucer",  collection: "V&B Benedikt Wellness",    brand: "Villeroy & Boch", source: "Subito.it", purchase: 30, inbound: 9,  status: "in transit", listPrice: 130, salePrice: null, saleDate: null,         channel: null,       shipment: "P-002" },
-          { id: "VB-WEL-030", product: "Wellness sugar bowl",    collection: "V&B Benedikt Wellness",    brand: "Villeroy & Boch", source: "eBay UK",   purchase: 40, inbound: 8,  status: "sold",       listPrice: 160, salePrice: 160,  saleDate: "2026-08-08", channel: "Avito",    shipment: "P-002" },
-          { id: "VB-SPT-004", product: "Sports mug",             collection: "V&B Benedikt Sports",      brand: "Villeroy & Boch", source: "eBay UK",   purchase: 30, inbound: 6,  status: "sourced",    listPrice: 95,  salePrice: null, saleDate: null,         channel: null,       shipment: null },
-          { id: "VB-SPT-002", product: "Sports plate",           collection: "V&B Benedikt Sports",      brand: "Villeroy & Boch", source: "eBay UK",   purchase: 55, inbound: 9,  status: "sold",       listPrice: 280, salePrice: 280,  saleDate: "2026-08-01", channel: "Telegram", shipment: "P-002" },
-        ],
-        shipments: [
-          { id: "P-001", date: "2026-06-14", outbound: 45, customs: 38, note: "Mixed Benedikt batch → Moscow" },
-          { id: "P-002", date: "2026-07-22", outbound: 52, customs: 60, note: "Automobile + Wellness pieces" },
-        ],
-      };
-
-      /* ======================================================================
          Small building blocks
       ====================================================================== */
-      const Chip = ({ status }) => {
-        const st = STATUS_STYLE[status] || STATUS_STYLE.sourced;
-        return <span className="chip" style={{ background: st.bg, color: st.fg }}>{status}</span>;
-      };
-
-      function Metric({ k, v, tone }) {
-        const color = tone === "positive" ? "var(--positive)" : "var(--ink)";
-        return (
-          <div className="metric">
-            <div className="k">{k}</div>
-            <div className="v mono" style={{ color }}>{v}</div>
-          </div>
-        );
+      const Chip = ({ status }) => { const st = STATUS_STYLE[status] || STATUS_STYLE.sourced; return <span className="chip" style={{ background: st.bg, color: st.fg }}>{status}</span>; };
+      function Metric({ k, v, tone }) { return (<div className="metric"><div className="k">{k}</div><div className="v mono" style={{ color: tone === "positive" ? "var(--positive)" : "var(--ink)" }}>{v}</div></div>); }
+      function MiniStat({ k, v, tone }) {
+        const color = tone === "positive" ? "var(--positive)" : tone === "accent" ? "var(--accent)" : "var(--ink)";
+        return (<div><div style={{ fontSize: 10.5, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{k}</div><div className="mono" style={{ fontSize: 16, fontWeight: 600, color, marginTop: 3 }}>{v}</div></div>);
       }
 
       /* ======================================================================
          Views
       ====================================================================== */
       function StockLedger({ rows, query, setQuery, onRemove }) {
-        if (!rows.length) {
-          return (
-            <div className="panel">
-              <div className="empty">
-                <b>No pieces match</b>
-                {query ? "Nothing here for that search — clear it to see the full register." : "Add your first piece to start the register."}
-                {query && <div style={{ marginTop: 12 }}><button className="btn btn-ghost" onClick={() => setQuery("")}>Clear search</button></div>}
-              </div>
-            </div>
-          );
-        }
+        if (!rows.length) return (
+          <div className="panel"><div className="empty"><b>No pieces match</b>{query ? "Nothing here for that search — clear it to see the full register." : "Add your first piece to start the register."}{query && <div style={{ marginTop: 12 }}><button className="btn btn-ghost" onClick={() => setQuery("")}>Clear search</button></div>}</div></div>
+        );
         return (
           <div className="panel">
             <div style={{ overflowX: "auto" }}>
               <table className="ledger">
-                <thead>
-                  <tr>
-                    <th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th>
-                    <th className="r">Landed</th><th className="r">List</th>
-                    <th className="r">Sold</th><th className="r">Margin</th>
-                    <th>Status</th><th></th>
-                  </tr>
-                </thead>
+                <thead><tr><th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th><th className="r">Landed</th><th className="r">List</th><th className="r">Sold</th><th className="r">Margin</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   {rows.map((it) => (
                     <tr key={it.id}>
@@ -418,10 +271,7 @@
                       <td style={{ fontWeight: 550 }}>{it.product}</td>
                       <td style={{ color: "var(--muted)" }}>{it.collection}</td>
                       <td style={{ color: "var(--muted)" }}>{it.source}</td>
-                      <td className="r mono">
-                        {money(it.landed)}
-                        {it.estimated && <span title="parcel costs not yet logged — margin not final" style={{ color: "var(--warn)", marginLeft: 3 }}>*</span>}
-                      </td>
+                      <td className="r mono">{money(it.landed)}{it.estimated && <span title="parcel costs not yet logged — margin not final" style={{ color: "var(--warn)", marginLeft: 3 }}>*</span>}</td>
                       <td className="r mono" style={{ color: "var(--muted)" }}>{it.listPrice ? money(it.listPrice) : "—"}</td>
                       <td className="r mono">{it.salePrice ? money(it.salePrice) : "—"}</td>
                       <td className="r mono" style={{ fontWeight: 600, color: it.margin != null ? "var(--positive)" : "var(--muted)" }}>{pct(it.margin)}</td>
@@ -432,9 +282,7 @@
                 </tbody>
               </table>
             </div>
-            <div style={{ padding: "11px 16px", borderTop: "1px solid var(--line-soft)", fontSize: 11.5, color: "var(--muted)" }}>
-              <span style={{ color: "var(--warn)" }}>*</span> estimate — the piece will travel but its parcel costs aren't logged yet, so its margin isn't settled.
-            </div>
+            <div style={{ padding: "11px 16px", borderTop: "1px solid var(--line-soft)", fontSize: 11.5, color: "var(--muted)" }}><span style={{ color: "var(--warn)" }}>*</span> estimate — the piece will travel but its parcel costs aren't logged yet, so its margin isn't settled.</div>
           </div>
         );
       }
@@ -448,18 +296,11 @@
               <div className="panel-head"><h3>Collections at a glance</h3><p>Bar length = pieces held or sold. Filled portion is sold.</p></div>
               <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: 15 }}>
                 {collections.map((c) => {
-                  const total = c.inStock + c.sold;
-                  const w = (total / maxColMagnitude) * 100;
-                  const soldW = total ? (c.sold / total) * 100 : 0;
+                  const total = c.inStock + c.sold; const w = (total / maxColMagnitude) * 100; const soldW = total ? (c.sold / total) * 100 : 0;
                   return (
                     <div key={c.name}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
-                        <span style={{ fontWeight: 550 }}>{c.name}</span>
-                        <span className="mono" style={{ color: "var(--muted)", fontSize: 12 }}>{c.inStock} on hand · {c.sold} sold</span>
-                      </div>
-                      <div style={{ height: 9, width: `${w}%`, minWidth: 22, background: "var(--surface)", border: "1px solid var(--accent)", borderRadius: 3, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${soldW}%`, background: "var(--accent)" }} />
-                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}><span style={{ fontWeight: 550 }}>{c.name}</span><span className="mono" style={{ color: "var(--muted)", fontSize: 12 }}>{c.inStock} on hand · {c.sold} sold</span></div>
+                      <div style={{ height: 9, width: `${w}%`, minWidth: 22, background: "var(--surface)", border: "1px solid var(--accent)", borderRadius: 3, overflow: "hidden" }}><div style={{ height: "100%", width: `${soldW}%`, background: "var(--accent)" }} /></div>
                     </div>
                   );
                 })}
@@ -471,11 +312,7 @@
                 {pipeline.map(({ s, n }) => (
                   <div key={s} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ width: 84, fontSize: 12.5, color: "var(--muted)", textTransform: "capitalize" }}>{s}</span>
-                    <div style={{ flex: 1, height: 24, background: "var(--canvas)", borderRadius: 5, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(n / maxPipe) * 100}%`, minWidth: n ? 24 : 0, background: STATUS_STYLE[s].bg, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 9 }}>
-                        <span className="mono" style={{ fontSize: 12, fontWeight: 600, color: STATUS_STYLE[s].fg }}>{n || ""}</span>
-                      </div>
-                    </div>
+                    <div style={{ flex: 1, height: 24, background: "var(--canvas)", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${(n / maxPipe) * 100}%`, minWidth: n ? 24 : 0, background: STATUS_STYLE[s].bg, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 9 }}><span className="mono" style={{ fontSize: 12, fontWeight: 600, color: STATUS_STYLE[s].fg }}>{n || ""}</span></div></div>
                   </div>
                 ))}
               </div>
@@ -485,148 +322,97 @@
       }
 
       function Delta({ now, prev }) {
-        if (!(prev > 0)) {
-          return <span style={{ fontSize: 11.5, color: "var(--muted)" }}>{money(prev)} last month</span>;
-        }
-        const change = ((now - prev) / prev) * 100;
-        const up = change >= 0;
-        const Arrow = up ? ArrowUpRight : ArrowDownRight;
-        const color = up ? "var(--positive)" : "#c0453e";
-        const soft = up ? "var(--positive-soft)" : "#fbe9e8";
-        return (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: soft, color, padding: "2px 7px", borderRadius: 6, fontSize: 11.5, fontWeight: 600 }}>
-            <Arrow size={13} />{Math.abs(Math.round(change))}% vs last month
-          </span>
-        );
+        if (!(prev > 0)) return <span style={{ fontSize: 11.5, color: "var(--muted)" }}>{money(prev)} last month</span>;
+        const change = ((now - prev) / prev) * 100; const up = change >= 0; const Arrow = up ? ArrowUpRight : ArrowDownRight;
+        return (<span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: up ? "var(--positive-soft)" : "#fbe9e8", color: up ? "var(--positive)" : "#c0453e", padding: "2px 7px", borderRadius: 6, fontSize: 11.5, fontWeight: 600 }}><Arrow size={13} />{Math.abs(Math.round(change))}% vs last month</span>);
       }
-
       function CompareCard({ label, sub, data, prev }) {
         const avgMargin = data.marginN ? data.marginSum / data.marginN : null;
         return (
           <div className="panel">
-            <div className="panel-head" style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <h3>{label}</h3><p style={{ marginTop: 0 }}>{sub}</p>
-            </div>
+            <div className="panel-head" style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}><h3>{label}</h3><p style={{ marginTop: 0 }}>{sub}</p></div>
             <div className="panel-body">
               <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
-                <div>
-                  <div style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)", fontWeight: 600 }}>Revenue</div>
-                  <div className="mono" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", margin: "4px 0 7px" }}>{money(data.revenue)}</div>
-                  {prev && <Delta now={data.revenue} prev={prev.revenue} />}
-                </div>
-                <div>
-                  <div style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)", fontWeight: 600 }}>Profit</div>
-                  <div className="mono" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", margin: "4px 0 7px", color: "var(--positive)" }}>{money(data.profit)}</div>
-                  {prev && <Delta now={data.profit} prev={prev.profit} />}
-                </div>
+                <div><div style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)", fontWeight: 600 }}>Revenue</div><div className="mono" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", margin: "4px 0 7px" }}>{money(data.revenue)}</div>{prev && <Delta now={data.revenue} prev={prev.revenue} />}</div>
+                <div><div style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)", fontWeight: 600 }}>Profit</div><div className="mono" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", margin: "4px 0 7px", color: "var(--positive)" }}>{money(data.profit)}</div>{prev && <Delta now={data.profit} prev={prev.profit} />}</div>
               </div>
-              <div style={{ display: "flex", gap: 22, marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--line-soft)" }}>
-                <MiniStat k="Units sold" v={data.count} />
-                <MiniStat k="Avg margin" v={pct(avgMargin)} tone="positive" />
-              </div>
+              <div style={{ display: "flex", gap: 22, marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--line-soft)" }}><MiniStat k="Units sold" v={data.count} /><MiniStat k="Avg margin" v={pct(avgMargin)} tone="positive" /></div>
             </div>
           </div>
         );
       }
-
       function Financials({ enriched }) {
-        const map = byMonth(enriched);
-        const now = new Date();
-        const thisKey = monthKey(now);
-        const lastKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+        const map = byMonth(enriched); const now = new Date();
+        const thisKey = monthKey(now); const lastKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
         const blank = { revenue: 0, profit: 0, count: 0, marginSum: 0, marginN: 0 };
-        const cur = map[thisKey] || blank;
-        const prev = map[lastKey] || blank;
-
+        const cur = map[thisKey] || blank; const prev = map[lastKey] || blank;
         const keys = Object.keys(map).sort().reverse().slice(0, 6);
         const maxRev = Math.max(1, ...keys.map((k) => map[k].revenue));
         const undated = enriched.filter((i) => i.sold && !i.saleDate).length;
-
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="grid2" style={{ gridTemplateColumns: "1fr 1fr" }}>
               <CompareCard label="This month" sub={monthLabel(thisKey)} data={cur} prev={prev} />
               <CompareCard label="Last month" sub={monthLabel(lastKey)} data={prev} prev={null} />
             </div>
-
             <div className="panel">
               <div className="panel-head"><h3>Monthly history</h3><p>Realised revenue and profit by month of sale.</p></div>
               {keys.length ? (
                 <div style={{ overflowX: "auto" }}>
                   <table className="ledger">
-                    <thead>
-                      <tr>
-                        <th>Month</th><th className="r">Sold</th><th>Revenue</th>
-                        <th className="r">Profit</th><th className="r">Avg margin</th>
-                      </tr>
-                    </thead>
+                    <thead><tr><th>Month</th><th className="r">Sold</th><th>Revenue</th><th className="r">Profit</th><th className="r">Avg margin</th></tr></thead>
                     <tbody>
-                      {keys.map((k) => {
-                        const m = map[k];
-                        const am = m.marginN ? m.marginSum / m.marginN : null;
-                        return (
-                          <tr key={k}>
-                            <td style={{ fontWeight: 550, whiteSpace: "nowrap" }}>{monthLabel(k)}</td>
-                            <td className="r mono" style={{ color: "var(--muted)" }}>{m.count}</td>
-                            <td>
-                              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <div style={{ flex: 1, minWidth: 80, maxWidth: 200, height: 8, background: "var(--canvas)", borderRadius: 3, overflow: "hidden" }}>
-                                  <div style={{ height: "100%", width: `${(m.revenue / maxRev) * 100}%`, background: "var(--accent)" }} />
-                                </div>
-                                <span className="mono" style={{ fontSize: 13 }}>{money(m.revenue)}</span>
-                              </div>
-                            </td>
-                            <td className="r mono" style={{ color: "var(--positive)", fontWeight: 600 }}>{money(m.profit)}</td>
-                            <td className="r mono">{pct(am)}</td>
-                          </tr>
-                        );
-                      })}
+                      {keys.map((k) => { const m = map[k]; const am = m.marginN ? m.marginSum / m.marginN : null; return (
+                        <tr key={k}>
+                          <td style={{ fontWeight: 550, whiteSpace: "nowrap" }}>{monthLabel(k)}</td>
+                          <td className="r mono" style={{ color: "var(--muted)" }}>{m.count}</td>
+                          <td><div style={{ display: "flex", alignItems: "center", gap: 10 }}><div style={{ flex: 1, minWidth: 80, maxWidth: 200, height: 8, background: "var(--canvas)", borderRadius: 3, overflow: "hidden" }}><div style={{ height: "100%", width: `${(m.revenue / maxRev) * 100}%`, background: "var(--accent)" }} /></div><span className="mono" style={{ fontSize: 13 }}>{money(m.revenue)}</span></div></td>
+                          <td className="r mono" style={{ color: "var(--positive)", fontWeight: 600 }}>{money(m.profit)}</td>
+                          <td className="r mono">{pct(am)}</td>
+                        </tr>
+                      ); })}
                     </tbody>
                   </table>
                 </div>
-              ) : (
-                <div className="empty"><b>No dated sales yet</b>Mark pieces sold with a sale date and they'll show up here by month.</div>
-              )}
-              {undated > 0 && (
-                <div style={{ padding: "11px 16px", borderTop: "1px solid var(--line-soft)", fontSize: 11.5, color: "var(--muted)" }}>
-                  {undated} sold {undated === 1 ? "piece isn't" : "pieces aren't"} dated, so {undated === 1 ? "it isn't" : "they aren't"} counted above. Add a sale date to each to include {undated === 1 ? "it" : "them"}.
-                </div>
-              )}
+              ) : (<div className="empty"><b>No dated sales yet</b>Mark pieces sold with a sale date and they'll show up here by month.</div>)}
+              {undated > 0 && (<div style={{ padding: "11px 16px", borderTop: "1px solid var(--line-soft)", fontSize: 11.5, color: "var(--muted)" }}>{undated} sold {undated === 1 ? "piece isn't" : "pieces aren't"} dated, so {undated === 1 ? "it isn't" : "they aren't"} counted above.</div>)}
             </div>
           </div>
         );
       }
 
-      function Collections({ collections, enriched }) {
+      function Collections({ collections, enriched, onAddCollection }) {
+        const [name, setName] = useState("");
+        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n); setName(""); };
         return (
-          <div className="grid-cards">
-            {collections.map((c) => {
-              const pieces = enriched.filter((i) => (i.collection || "Unassigned") === c.name);
-              return (
-                <div key={c.name} className="panel">
-                  <div className="panel-head">
-                    <h3>{c.name}</h3><p>{c.brand}</p>
-                  </div>
-                  <div className="panel-body">
-                    <div style={{ display: "flex", gap: 22, marginBottom: 14 }}>
-                      <MiniStat k="On hand" v={c.inStock} />
-                      <MiniStat k="Sold" v={c.sold} />
-                      <MiniStat k="Profit" v={money(c.profit)} tone="positive" />
-                      <MiniStat k="Held value" v={money(c.stockValue)} />
-                    </div>
-                    <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
-                      {pieces.map((p) => (
-                        <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}>
-                          <span>{p.product}</span>
-                          <span style={{ color: STATUS_STYLE[p.status].fg, fontWeight: 600, fontSize: 11.5 }}>{p.status}</span>
-                        </div>
-                      ))}
-                      {!pieces.length && <div style={{ fontSize: 12.5, color: "var(--muted)" }}>No pieces yet — nothing sourced in this series.</div>}
-                    </div>
-                  </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div className="panel">
+              <div className="panel-body" style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <div className="search" style={{ maxWidth: 360 }}>
+                  <Archive size={15} color="#9aa4b0" />
+                  <input placeholder="New collection name, e.g. V&B Benedikt Circus" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
                 </div>
-              );
-            })}
+                <button className="btn btn-primary" onClick={add}><Plus size={15} /> Add collection</button>
+                <span style={{ fontSize: 12, color: "var(--muted)" }}>Saved to Supabase — appears everywhere instantly.</span>
+              </div>
+            </div>
+            <div className="grid-cards">
+              {collections.map((c) => {
+                const pieces = enriched.filter((i) => (i.collection || "Unassigned") === c.name);
+                return (
+                  <div key={c.name} className="panel">
+                    <div className="panel-head"><h3>{c.name}</h3><p>{c.brand}</p></div>
+                    <div className="panel-body">
+                      <div style={{ display: "flex", gap: 22, marginBottom: 14 }}><MiniStat k="On hand" v={c.inStock} /><MiniStat k="Sold" v={c.sold} /><MiniStat k="Profit" v={money(c.profit)} tone="positive" /><MiniStat k="Held value" v={money(c.stockValue)} /></div>
+                      <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
+                        {pieces.map((p) => (<div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}><span>{p.product}</span><span style={{ color: STATUS_STYLE[p.status].fg, fontWeight: 600, fontSize: 11.5 }}>{p.status}</span></div>))}
+                        {!pieces.length && <div style={{ fontSize: 12.5, color: "var(--muted)" }}>No pieces yet — nothing sourced in this series.</div>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       }
@@ -635,47 +421,21 @@
         return (
           <div className="grid-cards">
             {shipments.map((s) => {
-              const pieces = enriched.filter((i) => i.shipment === s.id);
-              const parcelCost = (s.outbound || 0) + (s.customs || 0);
+              const pieces = enriched.filter((i) => i.shipment === s.id); const parcelCost = (s.outbound || 0) + (s.customs || 0);
               return (
                 <div key={s.id} className="panel">
-                  <div className="panel-head" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div><h3 className="mono">{s.id}</h3><p>{s.note}</p></div>
-                    <span style={{ fontSize: 11.5, color: "var(--muted)" }}>Sent {s.date}</span>
-                  </div>
+                  <div className="panel-head" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}><div><h3 className="mono">{s.id}</h3><p>{s.note}</p></div><span style={{ fontSize: 11.5, color: "var(--muted)" }}>Sent {s.date}</span></div>
                   <div className="panel-body">
-                    <div style={{ display: "flex", gap: 22, marginBottom: 14 }}>
-                      <MiniStat k="Outbound" v={money(s.outbound)} />
-                      <MiniStat k="Customs" v={money(s.customs)} />
-                      <MiniStat k="Parcel total" v={money(parcelCost)} tone="accent" />
-                      <MiniStat k="Pieces" v={pieces.length} />
-                    </div>
+                    <div style={{ display: "flex", gap: 22, marginBottom: 14 }}><MiniStat k="Outbound" v={money(s.outbound)} /><MiniStat k="Customs" v={money(s.customs)} /><MiniStat k="Parcel total" v={money(parcelCost)} tone="accent" /><MiniStat k="Pieces" v={pieces.length} /></div>
                     <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
-                      {pieces.map((p) => (
-                        <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}>
-                          <span>{p.product}</span>
-                          <span className="mono" style={{ color: "var(--muted)" }}>+{money(p.apportioned)} share</span>
-                        </div>
-                      ))}
+                      {pieces.map((p) => (<div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}><span>{p.product}</span><span className="mono" style={{ color: "var(--muted)" }}>+{money(p.apportioned)} share</span></div>))}
                       {!pieces.length && <div style={{ fontSize: 12, color: "var(--muted)" }}>No pieces assigned to this parcel yet.</div>}
                     </div>
-                    <button className="rm" style={{ marginTop: 12, fontSize: 12, gap: 6, padding: "4px 6px", color: "var(--muted)" }} onClick={() => onRemove(s.id)}>
-                      <Trash2 size={13} /> Remove parcel
-                    </button>
+                    <button className="rm" style={{ marginTop: 12, fontSize: 12, gap: 6, padding: "4px 6px", color: "var(--muted)" }} onClick={() => onRemove(s.id)}><Trash2 size={13} /> Remove parcel</button>
                   </div>
                 </div>
               );
             })}
-          </div>
-        );
-      }
-
-      function MiniStat({ k, v, tone }) {
-        const color = tone === "positive" ? "var(--positive)" : tone === "accent" ? "var(--accent)" : "var(--ink)";
-        return (
-          <div>
-            <div style={{ fontSize: 10.5, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{k}</div>
-            <div className="mono" style={{ fontSize: 16, fontWeight: 600, color, marginTop: 3 }}>{v}</div>
           </div>
         );
       }
@@ -687,33 +447,18 @@
         return (
           <div className="scrim" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-head">
-                <h3>{title}</h3>
-                <button className="rm" onClick={onClose}><X size={18} /></button>
-              </div>
+              <div className="modal-head"><h3>{title}</h3><button className="rm" onClick={onClose}><X size={18} /></button></div>
               <div className="modal-body">{children}</div>
-              <div className="modal-foot">
-                <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-                <button className="btn btn-primary" onClick={onSave}>Save</button>
-              </div>
+              <div className="modal-foot"><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={onSave}>Save</button></div>
             </div>
           </div>
         );
       }
+      const F = ({ label, ...p }) => (<label className="field"><span>{label}</span><input {...p} /></label>);
+      const Sel = ({ label, value, onChange, options, optionLabels = {} }) => (<label className="field"><span>{label}</span><select value={value} onChange={onChange}>{options.map((o) => <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>)}</select></label>);
 
-      const F = ({ label, ...p }) => (
-        <label className="field"><span>{label}</span><input {...p} /></label>
-      );
-      const S = ({ label, value, onChange, options, optionLabels = {} }) => (
-        <label className="field"><span>{label}</span>
-          <select value={value} onChange={onChange}>
-            {options.map((o) => <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>)}
-          </select>
-        </label>
-      );
-
-      function ItemForm({ onClose, onSave, shipments, existing }) {
-        const [f, setF] = useState({ id: "", product: "", collection: COLLECTIONS[0].name, brand: COLLECTIONS[0].brand, source: "eBay UK", purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
+      function ItemForm({ onClose, onSave, shipments, collections, existing }) {
+        const [f, setF] = useState({ id: "", product: "", collection: collections[0]?.name || "", brand: collections[0]?.brand || "Villeroy & Boch", source: "eBay UK", purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
         const doSave = () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
@@ -724,17 +469,13 @@
         };
         return (
           <Modal title="Add a piece" onClose={onClose} onSave={doSave}>
-            <div className="frow"><F label="SKU" placeholder="VB-BEN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Benedikt teapot" value={f.product} onChange={set("product")} /></div>
+            <div className="frow"><F label="SKU" placeholder="VB-GRN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Greenland teapot" value={f.product} onChange={set("product")} /></div>
             <div className="frow">
-              <label className="field"><span>Collection</span>
-                <select value={f.collection} onChange={(e) => { const name = e.target.value; const c = COLLECTIONS.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}>
-                  {COLLECTIONS.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-                </select>
-              </label>
+              <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
               <F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} />
             </div>
-            <div className="frow"><S label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" value={f.purchase} onChange={set("purchase")} /></div>
-            <div className="frow"><F label="Inbound shipping (£)" type="number" value={f.inbound} onChange={set("inbound")} /><S label="Status" value={f.status} onChange={set("status")} options={STATUSES} /></div>
+            <div className="frow"><Sel label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" value={f.purchase} onChange={set("purchase")} /></div>
+            <div className="frow"><F label="Inbound shipping (£)" type="number" value={f.inbound} onChange={set("inbound")} /><Sel label="Status" value={f.status} onChange={set("status")} options={STATUSES} /></div>
             <div className="frow"><F label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} /><F label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} /></div>
             <div className="frow"><F label="Sale date" type="date" value={f.saleDate} onChange={set("saleDate")} /><F label="Sale channel" placeholder="Avito" value={f.channel} onChange={set("channel")} /></div>
             <label className="field"><span>Parcel</span><select value={f.shipment} onChange={set("shipment")}><option value="">— none yet —</option>{shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}</select></label>
@@ -764,13 +505,9 @@
          App shell
       ====================================================================== */
       const NAV = [
-        ["stock", "Stock", Boxes],
-        ["overview", "Overview", LayoutGrid],
-        ["financials", "Financials", PoundSterling],
-        ["collections", "Collections", Archive],
-        ["parcels", "Parcels", Truck],
+        ["stock", "Stock", Boxes], ["overview", "Overview", LayoutGrid], ["financials", "Financials", PoundSterling],
+        ["collections", "Collections", Archive], ["parcels", "Parcels", Truck],
       ];
-
       const VIEW_META = {
         stock:       { title: "Stock register", sub: "Every physical piece, from source to sold." },
         overview:    { title: "Overview", sub: "How the stock and the money are moving." },
@@ -785,84 +522,100 @@
         const [query, setQuery] = useState("");
         const [statusFilter, setStatusFilter] = useState("all");
 
-        const initial = load();
-        const [items, setItems] = useState(initial?.items ?? SEED.items);
-        const [shipments, setShipments] = useState(initial?.shipments ?? SEED.shipments);
-        useEffect(() => { save({ items, shipments }); }, [items, shipments]);
+        const [items, setItems] = useState([]);
+        const [shipments, setShipments] = useState([]);
+        const [collections, setCollections] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [online, setOnline] = useState(true);
+        const [error, setError] = useState(null);
+
+        const loadAll = useCallback(async () => {
+          try {
+            const [ci, si, ii] = await Promise.all([
+              sb.from("pf_collections").select("*").order("sort", { ascending: true }),
+              sb.from("pf_shipments").select("*").order("created_at", { ascending: true }),
+              sb.from("pf_items").select("*").order("created_at", { ascending: false }),
+            ]);
+            if (ci.error || si.error || ii.error) throw (ci.error || si.error || ii.error);
+            setCollections(ci.data.map((c) => ({ name: c.name, brand: c.brand })));
+            setShipments(si.data.map(shipFromRow));
+            setItems(ii.data.map(itemFromRow));
+            setError(null); setOnline(true);
+          } catch (e) {
+            setError(e.message || "Couldn't reach the database."); setOnline(false);
+          } finally { setLoading(false); }
+        }, []);
+
+        useEffect(() => {
+          loadAll();
+          const ch = sb.channel("pf-changes")
+            .on("postgres_changes", { event: "*", schema: "public", table: "pf_items" }, loadAll)
+            .on("postgres_changes", { event: "*", schema: "public", table: "pf_shipments" }, loadAll)
+            .on("postgres_changes", { event: "*", schema: "public", table: "pf_collections" }, loadAll)
+            .subscribe((status) => { if (status === "SUBSCRIBED") setOnline(true); });
+          return () => { sb.removeChannel(ch); };
+        }, [loadAll]);
 
         const enriched = useMemo(() => enrich(items, shipments), [items, shipments]);
         const kpi = useMemo(() => rollups(enriched), [enriched]);
-        const collections = useMemo(() => byCollection(enriched), [enriched]);
-        const maxColMagnitude = Math.max(1, ...collections.map((c) => c.inStock + c.sold));
+        const collectionRollup = useMemo(() => byCollection(enriched, collections), [enriched, collections]);
+        const maxColMagnitude = Math.max(1, ...collectionRollup.map((c) => c.inStock + c.sold));
 
         const ledgerRows = useMemo(() => {
           const q = query.trim().toLowerCase();
           return enriched.filter((it) => {
             if (statusFilter !== "all" && it.status !== statusFilter) return false;
             if (!q) return true;
-            return [it.id, it.product, it.collection, it.source, it.brand]
-              .filter(Boolean).some((v) => v.toLowerCase().includes(q));
+            return [it.id, it.product, it.collection, it.source, it.brand].filter(Boolean).some((v) => v.toLowerCase().includes(q));
           });
         }, [enriched, query, statusFilter]);
 
-        const removeItem = (id) => setItems((xs) => xs.filter((x) => x.id !== id));
-        const removeShipment = (id) => {
+        // Writes — go to Supabase; realtime refreshes every open instance.
+        const addItem = async (it) => { setItems((xs) => [it, ...xs]); const { error } = await sb.from("pf_items").insert(itemToRow(it)); if (error) { alert("Save failed: " + error.message); loadAll(); } };
+        const removeItem = async (id) => { setItems((xs) => xs.filter((x) => x.id !== id)); const { error } = await sb.from("pf_items").delete().eq("id", id); if (error) { alert("Remove failed: " + error.message); loadAll(); } };
+        const addShipment = async (s) => { setShipments((xs) => [...xs, s]); const { error } = await sb.from("pf_shipments").insert(s); if (error) { alert("Save failed: " + error.message); loadAll(); } };
+        const removeShipment = async (id) => {
           setShipments((xs) => xs.filter((x) => x.id !== id));
           setItems((xs) => xs.map((x) => (x.shipment === id ? { ...x, shipment: null } : x)));
+          await sb.from("pf_items").update({ shipment: null }).eq("shipment", id);
+          const { error } = await sb.from("pf_shipments").delete().eq("id", id);
+          if (error) { alert("Remove failed: " + error.message); loadAll(); }
         };
-        const resetSeed = () => { setItems(SEED.items); setShipments(SEED.shipments); setQuery(""); setStatusFilter("all"); };
+        const addCollection = async (name) => {
+          if (collections.some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert("That collection already exists."); return; }
+          setCollections((xs) => [...xs, { name, brand: "Villeroy & Boch" }]);
+          const { error } = await sb.from("pf_collections").insert({ name, brand: "Villeroy & Boch", sort: collections.length + 1 });
+          if (error) { alert("Save failed: " + error.message); loadAll(); }
+        };
 
         const meta = VIEW_META[tab];
 
         return (
           <div className="app">
-            {/* Operations rail */}
             <aside className="rail">
               <div className="brand">
-                <div>
-                  <div className="brand-mark">Stock system</div>
-                  <div className="brand-name">Porcelain Freaks</div>
-                </div>
-                <div className="brand-tally">
-                  <b className="mono">{kpi.inStock}</b><span>on hand</span>
-                </div>
+                <div><div className="brand-mark">Stock system</div><div className="brand-name">Porcelain Freaks</div></div>
+                <div className="brand-tally"><b className="mono">{kpi.inStock}</b><span>on hand</span></div>
               </div>
               <nav className="nav">
                 {NAV.map(([key, label, Icon]) => {
-                  const count = key === "stock" ? items.length
-                    : key === "collections" ? collections.length
-                    : key === "parcels" ? shipments.length : null;
-                  return (
-                    <button key={key} className={"nav-item" + (tab === key ? " active" : "")} onClick={() => setTab(key)}>
-                      <Icon size={16} /> {label}
-                      {count != null && <span className="badge">{count}</span>}
-                    </button>
-                  );
+                  const count = key === "stock" ? items.length : key === "collections" ? collections.length : key === "parcels" ? shipments.length : null;
+                  return (<button key={key} className={"nav-item" + (tab === key ? " active" : "")} onClick={() => setTab(key)}><Icon size={16} /> {label}{count != null && <span className="badge">{count}</span>}</button>);
                 })}
               </nav>
               <div className="rail-foot">
-                <button onClick={resetSeed}><RotateCcw size={13} /> Reset to sample</button>
+                <div className="sync"><span className={"dot" + (online ? "" : " off")} />{online ? "Synced to Supabase" : "Offline — retrying"}</div>
                 <div>Landed cost = purchase + inbound + this piece's share of its parcel (outbound + customs), by value.</div>
               </div>
             </aside>
 
-            {/* Workspace */}
             <main className="workspace">
               <div className="toolbar">
-                <div>
-                  <h2>{meta.title}</h2>
-                  <div className="sub">{meta.sub}</div>
-                </div>
+                <div><h2>{meta.title}</h2><div className="sub">{meta.sub}</div></div>
                 {tab === "stock" && (
                   <>
-                    <div className="search">
-                      <Search size={15} color="#9aa4b0" />
-                      <input placeholder="Search SKU, piece, collection…" value={query} onChange={(e) => setQuery(e.target.value)} />
-                    </div>
-                    <select className="filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                      <option value="all">All statuses</option>
-                      {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <div className="search"><Search size={15} color="#9aa4b0" /><input placeholder="Search SKU, piece, collection…" value={query} onChange={(e) => setQuery(e.target.value)} /></div>
+                    <select className="filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}><option value="all">All statuses</option>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
                   </>
                 )}
                 <div className="toolbar-actions">
@@ -872,25 +625,25 @@
               </div>
 
               <div className="metrics">
-                <Metric k="On hand" v={kpi.inStock} />
-                <Metric k="Stock value" v={money(kpi.stockValue)} />
-                <Metric k="Sold" v={kpi.soldCount} />
-                <Metric k="Revenue" v={money(kpi.revenue)} />
-                <Metric k="Profit" v={money(kpi.profit)} tone="positive" />
-                <Metric k="Avg margin" v={pct(kpi.avgMargin)} tone="positive" />
+                <Metric k="On hand" v={kpi.inStock} /><Metric k="Stock value" v={money(kpi.stockValue)} /><Metric k="Sold" v={kpi.soldCount} />
+                <Metric k="Revenue" v={money(kpi.revenue)} /><Metric k="Profit" v={money(kpi.profit)} tone="positive" /><Metric k="Avg margin" v={pct(kpi.avgMargin)} tone="positive" />
               </div>
 
+              {error && <div className="banner">Can't reach Supabase: {error}. Showing the last data loaded; changes will retry automatically.</div>}
+
               <div className="content">
-                {tab === "stock" && <StockLedger rows={ledgerRows} query={query} setQuery={setQuery} onRemove={removeItem} />}
-                {tab === "overview" && <Overview collections={collections} maxColMagnitude={maxColMagnitude} enriched={enriched} />}
-                {tab === "financials" && <Financials enriched={enriched} />}
-                {tab === "collections" && <Collections collections={collections} enriched={enriched} />}
-                {tab === "parcels" && <Parcels shipments={shipments} enriched={enriched} onRemove={removeShipment} />}
+                {loading ? <div className="loading">Loading stock from Supabase…</div> : (<>
+                  {tab === "stock" && <StockLedger rows={ledgerRows} query={query} setQuery={setQuery} onRemove={removeItem} />}
+                  {tab === "overview" && <Overview collections={collectionRollup} maxColMagnitude={maxColMagnitude} enriched={enriched} />}
+                  {tab === "financials" && <Financials enriched={enriched} />}
+                  {tab === "collections" && <Collections collections={collectionRollup} enriched={enriched} onAddCollection={addCollection} />}
+                  {tab === "parcels" && <Parcels shipments={shipments} enriched={enriched} onRemove={removeShipment} />}
+                </>)}
               </div>
             </main>
 
-            {modal === "item" && <ItemForm onClose={() => setModal(null)} onSave={(it) => { setItems((xs) => [it, ...xs]); setModal(null); }} shipments={shipments} existing={items} />}
-            {modal === "shipment" && <ShipmentForm onClose={() => setModal(null)} onSave={(s) => { setShipments((xs) => [s, ...xs]); setModal(null); }} existing={shipments} />}
+            {modal === "item" && <ItemForm onClose={() => setModal(null)} onSave={(it) => { addItem(it); setModal(null); }} shipments={shipments} collections={collections} existing={items} />}
+            {modal === "shipment" && <ShipmentForm onClose={() => setModal(null)} onSave={(s) => { addShipment(s); setModal(null); }} existing={shipments} />}
           </div>
         );
       }
