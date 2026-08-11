@@ -138,7 +138,7 @@
       import { createClient } from "@supabase/supabase-js";
       import {
         Boxes, LayoutGrid, Archive, Truck, Plus, Ship, Trash2, X,
-        Search, PoundSterling, ArrowUpRight, ArrowDownRight,
+        Search, PoundSterling, ArrowUpRight, ArrowDownRight, LogOut,
       } from "lucide-react";
 
       /* ======================================================================
@@ -516,7 +516,7 @@
         parcels:     { title: "Parcels", sub: "Batches to Moscow, with real customs apportioned by value." },
       };
 
-      function App() {
+      function Dashboard({ onLogout }) {
         const [tab, setTab] = useState("stock");
         const [modal, setModal] = useState(null);
         const [query, setQuery] = useState("");
@@ -606,6 +606,7 @@
               <div className="rail-foot">
                 <div className="sync"><span className={"dot" + (online ? "" : " off")} />{online ? "Synced to Supabase" : "Offline — retrying"}</div>
                 <div>Landed cost = purchase + inbound + this piece's share of its parcel (outbound + customs), by value.</div>
+                <button onClick={onLogout} style={{ marginTop: 11, color: "var(--rail-text)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><LogOut size={13} /> Sign out</button>
               </div>
             </aside>
 
@@ -646,6 +647,56 @@
             {modal === "shipment" && <ShipmentForm onClose={() => setModal(null)} onSave={(s) => { addShipment(s); setModal(null); }} existing={shipments} />}
           </div>
         );
+      }
+
+      /* ======================================================================
+         Login gate — real Supabase Auth. Without a session the tables are
+         unreachable (RLS restricts them to authenticated users).
+      ====================================================================== */
+      function Login() {
+        const [u, setU] = useState("");
+        const [p, setP] = useState("");
+        const [err, setErr] = useState(null);
+        const [busy, setBusy] = useState(false);
+        const submit = async () => {
+          if (!u.trim() || !p) return;
+          setBusy(true); setErr(null);
+          const email = u.includes("@") ? u.trim() : `${u.trim().toLowerCase()}@porcelainfreaks.app`;
+          const { error } = await sb.auth.signInWithPassword({ email, password: p });
+          setBusy(false);
+          if (error) setErr("That username or password isn't right.");
+          // On success, onAuthStateChange in App swaps the view in.
+        };
+        return (
+          <div style={{ minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+            <div style={{ width: "100%", maxWidth: 360 }}>
+              <div style={{ textAlign: "center", marginBottom: 22 }}>
+                <div style={{ fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600 }}>Stock system</div>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.01em", marginTop: 5 }}>Porcelain Freaks</div>
+              </div>
+              <div className="panel">
+                <div className="panel-body">
+                  <label className="field"><span>Username</span><input autoFocus value={u} onChange={(e) => setU(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} /></label>
+                  <label className="field"><span>Password</span><input type="password" value={p} onChange={(e) => setP(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} /></label>
+                  {err && <div style={{ fontSize: 12.5, color: "#c0453e", marginBottom: 10 }}>{err}</div>}
+                  <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={submit} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [session, setSession] = useState(undefined); // undefined = still checking
+        useEffect(() => {
+          sb.auth.getSession().then(({ data }) => setSession(data.session));
+          const { data: sub } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
+          return () => sub.subscription.unsubscribe();
+        }, []);
+        if (session === undefined) return <div className="loading" style={{ paddingTop: 120 }}>Loading…</div>;
+        if (!session) return <Login />;
+        return <Dashboard onLogout={() => sb.auth.signOut()} />;
       }
 
       createRoot(document.getElementById("root")).render(<App />);
