@@ -235,6 +235,16 @@
         sold:         { bg: "#e3f0e9", fg: "#2f7d5f" },
       };
 
+      // The collections you're actively completing. These always appear on the
+      // Collections page, even at zero stock, so gaps to fill are visible.
+      const COLLECTIONS = [
+        { name: "V&B Benedikt Greenland",   brand: "Villeroy & Boch" },
+        { name: "V&B Benedikt Animal Park", brand: "Villeroy & Boch" },
+        { name: "V&B Benedikt Automobile",  brand: "Villeroy & Boch" },
+        { name: "V&B Benedikt Wellness",    brand: "Villeroy & Boch" },
+        { name: "V&B Benedikt Sports",      brand: "Villeroy & Boch" },
+      ];
+
       /* ======================================================================
          Formatting
       ====================================================================== */
@@ -305,6 +315,7 @@
 
       function byCollection(enriched) {
         const map = {};
+        COLLECTIONS.forEach((c) => { map[c.name] = { name: c.name, brand: c.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 }; });
         enriched.forEach((i) => {
           const key = i.collection || "Unassigned";
           if (!map[key]) map[key] = { name: key, brand: i.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 };
@@ -336,22 +347,22 @@
       ====================================================================== */
       const SEED = {
         items: [
-          { id: "VB-BEN-001", product: "Benedikt teapot",        collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "eBay UK",   purchase: 42, inbound: 6,  status: "listed",     listPrice: 210, salePrice: null, saleDate: null,         channel: null,      shipment: "P-001" },
-          { id: "VB-BEN-002", product: "Benedikt sugar bowl",    collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "eBay UK",   purchase: 28, inbound: 5,  status: "listed",     listPrice: 150, salePrice: null, saleDate: null,         channel: null,      shipment: "P-001" },
-          { id: "VB-BEN-003", product: "Benedikt milk jug",      collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "Vinted",    purchase: 22, inbound: 4,  status: "sold",       listPrice: 140, salePrice: 140,  saleDate: "2026-07-05", channel: "Avito",   shipment: "P-001" },
-          { id: "VB-BEN-005", product: "Benedikt cup & saucer",  collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "eBay UK",   purchase: 24, inbound: 5,  status: "sold",       listPrice: 120, salePrice: 120,  saleDate: "2026-07-18", channel: "Avito",   shipment: "P-001" },
-          { id: "VB-BUN-014", product: "Bunny Family plate",     collection: "V&B Bunny Family",            brand: "Villeroy & Boch", source: "Leboncoin", purchase: 18, inbound: 7,  status: "sold",       listPrice: 95,  salePrice: 105,  saleDate: "2026-08-03", channel: "Avito",   shipment: "P-001" },
-          { id: "VB-BUN-015", product: "Bunny Family mug",       collection: "V&B Bunny Family",            brand: "Villeroy & Boch", source: "eBay UK",   purchase: 15, inbound: 4,  status: "with rep",   listPrice: 80,  salePrice: null, saleDate: null,         channel: null,      shipment: "P-002" },
-          { id: "VB-FOX-009", product: "Foxwood Tales plate",    collection: "V&B Foxwood Tales",           brand: "Villeroy & Boch", source: "Vinted",    purchase: 20, inbound: 6,  status: "sold",       listPrice: 90,  salePrice: 90,   saleDate: "2026-07-27", channel: "Avito",   shipment: "P-001" },
-          { id: "RD-BH-031",  product: "Brambly Hedge teapot",   collection: "Royal Doulton Brambly Hedge", brand: "Royal Doulton",   source: "eBay UK",   purchase: 55, inbound: 8,  status: "listed",     listPrice: 260, salePrice: null, saleDate: null,         channel: null,      shipment: "P-002" },
-          { id: "RD-BH-032",  product: "Brambly Hedge cup & saucer", collection: "Royal Doulton Brambly Hedge", brand: "Royal Doulton", source: "Subito.it", purchase: 30, inbound: 9, status: "in transit", listPrice: 130, salePrice: null, saleDate: null,      channel: null,      shipment: "P-002" },
-          { id: "RD-BH-030",  product: "Brambly Hedge sugar bowl", collection: "Royal Doulton Brambly Hedge", brand: "Royal Doulton", source: "eBay UK",   purchase: 40, inbound: 8,  status: "sold",       listPrice: 160, salePrice: 160,  saleDate: "2026-08-08", channel: "Avito",   shipment: "P-002" },
-          { id: "CH-BUT-004", product: "Christofle butter dish", collection: "Christofle silver",           brand: "Christofle",      source: "eBay UK",   purchase: 60, inbound: 10, status: "sourced",    listPrice: 320, salePrice: null, saleDate: null,         channel: null,      shipment: null },
-          { id: "CH-TOA-002", product: "Christofle toast rack",  collection: "Christofle silver",           brand: "Christofle",      source: "eBay UK",   purchase: 55, inbound: 9,  status: "sold",       listPrice: 280, salePrice: 280,  saleDate: "2026-08-01", channel: "Telegram", shipment: "P-002" },
+          { id: "VB-GRN-001", product: "Greenland teapot",       collection: "V&B Benedikt Greenland",   brand: "Villeroy & Boch", source: "eBay UK",   purchase: 42, inbound: 6,  status: "listed",     listPrice: 210, salePrice: null, saleDate: null,         channel: null,       shipment: "P-001" },
+          { id: "VB-GRN-002", product: "Greenland sugar bowl",   collection: "V&B Benedikt Greenland",   brand: "Villeroy & Boch", source: "eBay UK",   purchase: 28, inbound: 5,  status: "listed",     listPrice: 150, salePrice: null, saleDate: null,         channel: null,       shipment: "P-001" },
+          { id: "VB-GRN-003", product: "Greenland milk jug",     collection: "V&B Benedikt Greenland",   brand: "Villeroy & Boch", source: "Vinted",    purchase: 22, inbound: 4,  status: "sold",       listPrice: 140, salePrice: 140,  saleDate: "2026-07-05", channel: "Avito",    shipment: "P-001" },
+          { id: "VB-ANP-011", product: "Animal Park cup & saucer", collection: "V&B Benedikt Animal Park", brand: "Villeroy & Boch", source: "eBay UK",  purchase: 24, inbound: 5,  status: "sold",       listPrice: 120, salePrice: 120,  saleDate: "2026-07-18", channel: "Avito",    shipment: "P-001" },
+          { id: "VB-ANP-014", product: "Animal Park plate",      collection: "V&B Benedikt Animal Park", brand: "Villeroy & Boch", source: "Leboncoin", purchase: 18, inbound: 7,  status: "sold",       listPrice: 95,  salePrice: 105,  saleDate: "2026-08-03", channel: "Avito",    shipment: "P-001" },
+          { id: "VB-ANP-015", product: "Animal Park mug",        collection: "V&B Benedikt Animal Park", brand: "Villeroy & Boch", source: "eBay UK",   purchase: 15, inbound: 4,  status: "with rep",   listPrice: 80,  salePrice: null, saleDate: null,         channel: null,       shipment: "P-002" },
+          { id: "VB-AUT-009", product: "Automobile plate",       collection: "V&B Benedikt Automobile",  brand: "Villeroy & Boch", source: "Vinted",    purchase: 20, inbound: 6,  status: "sold",       listPrice: 90,  salePrice: 90,   saleDate: "2026-07-27", channel: "Avito",    shipment: "P-001" },
+          { id: "VB-AUT-031", product: "Automobile teapot",      collection: "V&B Benedikt Automobile",  brand: "Villeroy & Boch", source: "eBay UK",   purchase: 55, inbound: 8,  status: "listed",     listPrice: 260, salePrice: null, saleDate: null,         channel: null,       shipment: "P-002" },
+          { id: "VB-WEL-032", product: "Wellness cup & saucer",  collection: "V&B Benedikt Wellness",    brand: "Villeroy & Boch", source: "Subito.it", purchase: 30, inbound: 9,  status: "in transit", listPrice: 130, salePrice: null, saleDate: null,         channel: null,       shipment: "P-002" },
+          { id: "VB-WEL-030", product: "Wellness sugar bowl",    collection: "V&B Benedikt Wellness",    brand: "Villeroy & Boch", source: "eBay UK",   purchase: 40, inbound: 8,  status: "sold",       listPrice: 160, salePrice: 160,  saleDate: "2026-08-08", channel: "Avito",    shipment: "P-002" },
+          { id: "VB-SPT-004", product: "Sports mug",             collection: "V&B Benedikt Sports",      brand: "Villeroy & Boch", source: "eBay UK",   purchase: 30, inbound: 6,  status: "sourced",    listPrice: 95,  salePrice: null, saleDate: null,         channel: null,       shipment: null },
+          { id: "VB-SPT-002", product: "Sports plate",           collection: "V&B Benedikt Sports",      brand: "Villeroy & Boch", source: "eBay UK",   purchase: 55, inbound: 9,  status: "sold",       listPrice: 280, salePrice: 280,  saleDate: "2026-08-01", channel: "Telegram", shipment: "P-002" },
         ],
         shipments: [
-          { id: "P-001", date: "2026-06-14", outbound: 45, customs: 38, note: "Mixed china batch → Moscow" },
-          { id: "P-002", date: "2026-07-22", outbound: 52, customs: 60, note: "Doulton + Bunny Family" },
+          { id: "P-001", date: "2026-06-14", outbound: 45, customs: 38, note: "Mixed Benedikt batch → Moscow" },
+          { id: "P-002", date: "2026-07-22", outbound: 52, customs: 60, note: "Automobile + Wellness pieces" },
         ],
       };
 
@@ -610,6 +621,7 @@
                           <span style={{ color: STATUS_STYLE[p.status].fg, fontWeight: 600, fontSize: 11.5 }}>{p.status}</span>
                         </div>
                       ))}
+                      {!pieces.length && <div style={{ fontSize: 12.5, color: "var(--muted)" }}>No pieces yet — nothing sourced in this series.</div>}
                     </div>
                   </div>
                 </div>
@@ -701,7 +713,7 @@
       );
 
       function ItemForm({ onClose, onSave, shipments, existing }) {
-        const [f, setF] = useState({ id: "", product: "", collection: "", brand: "", source: "eBay UK", purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
+        const [f, setF] = useState({ id: "", product: "", collection: COLLECTIONS[0].name, brand: COLLECTIONS[0].brand, source: "eBay UK", purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
         const doSave = () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
@@ -713,7 +725,14 @@
         return (
           <Modal title="Add a piece" onClose={onClose} onSave={doSave}>
             <div className="frow"><F label="SKU" placeholder="VB-BEN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Benedikt teapot" value={f.product} onChange={set("product")} /></div>
-            <div className="frow"><F label="Collection" placeholder="V&B Benedikt" value={f.collection} onChange={set("collection")} /><F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} /></div>
+            <div className="frow">
+              <label className="field"><span>Collection</span>
+                <select value={f.collection} onChange={(e) => { const name = e.target.value; const c = COLLECTIONS.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}>
+                  {COLLECTIONS.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                </select>
+              </label>
+              <F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} />
+            </div>
             <div className="frow"><S label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" value={f.purchase} onChange={set("purchase")} /></div>
             <div className="frow"><F label="Inbound shipping (£)" type="number" value={f.inbound} onChange={set("inbound")} /><S label="Status" value={f.status} onChange={set("status")} options={STATUSES} /></div>
             <div className="frow"><F label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} /><F label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} /></div>
