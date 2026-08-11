@@ -133,12 +133,12 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module" data-presets="react">
-      import React, { useState, useEffect, useMemo, useCallback } from "react";
+      import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
       import { createRoot } from "react-dom/client";
       import { createClient } from "@supabase/supabase-js";
       import {
         Boxes, LayoutGrid, Archive, Truck, Plus, Ship, Trash2, X,
-        Search, PoundSterling, ArrowUpRight, ArrowDownRight, LogOut,
+        Search, PoundSterling, ArrowUpRight, ArrowDownRight, LogOut, ImagePlus,
       } from "lucide-react";
 
       /* ======================================================================
@@ -156,14 +156,24 @@
         purchase: Number(r.purchase) || 0, inbound: Number(r.inbound) || 0, status: r.status, location: r.location || "London",
         listPrice: r.list_price == null ? null : Number(r.list_price),
         salePrice: r.sale_price == null ? null : Number(r.sale_price),
-        saleDate: r.sale_date || null, channel: r.channel, shipment: r.shipment,
+        saleDate: r.sale_date || null, channel: r.channel, shipment: r.shipment, imageUrl: r.image_url || null,
       });
       const itemToRow = (it) => ({
         id: it.id, product: it.product, collection: it.collection, brand: it.brand, source: it.source,
         purchase: it.purchase, inbound: it.inbound, status: it.status, location: it.location,
         list_price: it.listPrice, sale_price: it.salePrice, sale_date: it.saleDate,
-        channel: it.channel, shipment: it.shipment,
+        channel: it.channel, shipment: it.shipment, image_url: it.imageUrl || null,
       });
+
+      // Upload a photo to Supabase Storage and return its public URL.
+      const IMG_BUCKET = "pf-images";
+      async function uploadItemImage(file, id) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${id}/${Date.now()}.${ext}`;
+        const { error } = await sb.storage.from(IMG_BUCKET).upload(path, file, { upsert: true, contentType: file.type });
+        if (error) throw error;
+        return sb.storage.from(IMG_BUCKET).getPublicUrl(path).data.publicUrl;
+      }
       const shipFromRow = (r) => ({ id: r.id, date: r.date, outbound: Number(r.outbound) || 0, customs: Number(r.customs) || 0, note: r.note });
 
       /* ======================================================================
@@ -253,6 +263,66 @@
       ====================================================================== */
       const Chip = ({ status }) => { const st = STATUS_STYLE[status] || STATUS_STYLE.sourced; return <span className="chip" style={{ background: st.bg, color: st.fg }}>{status}</span>; };
       const LocChip = ({ loc }) => { const st = LOCATION_STYLE[loc] || LOCATION_STYLE["London"]; return <span className="chip" style={{ background: st.bg, color: st.fg }}>{loc || "London"}</span>; };
+
+      // Ledger thumbnail: shows the photo (tap to enlarge) or an upload button.
+      function Thumb({ item, onSetImage, onZoom }) {
+        const [busy, setBusy] = useState(false);
+        const inputRef = useRef(null);
+        const onFile = async (e) => {
+          const file = e.target.files && e.target.files[0];
+          e.target.value = "";
+          if (!file) return;
+          setBusy(true);
+          try { const url = await uploadItemImage(file, item.id); await onSetImage(item.id, url); }
+          catch (err) { alert("Upload failed: " + err.message); }
+          setBusy(false);
+        };
+        return (
+          <div style={{ width: 46, height: 46 }}>
+            <input ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onFile} />
+            {item.imageUrl ? (
+              <img src={item.imageUrl} alt={item.product} onClick={() => onZoom(item)} style={{ width: 46, height: 46, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)", cursor: "zoom-in", display: "block" }} />
+            ) : (
+              <button onClick={() => inputRef.current && inputRef.current.click()} title="Add photo" style={{ width: 46, height: 46, borderRadius: 7, border: "1px dashed #c7cfd8", color: "var(--muted)", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--canvas)" }}>
+                {busy ? "…" : <ImagePlus size={17} />}
+              </button>
+            )}
+          </div>
+        );
+      }
+
+      // Full-size photo view with replace / remove.
+      function Lightbox({ item, onClose, onSetImage, onClearImage }) {
+        const [busy, setBusy] = useState(false);
+        const inputRef = useRef(null);
+        const onFile = async (e) => {
+          const file = e.target.files && e.target.files[0];
+          e.target.value = "";
+          if (!file) return;
+          setBusy(true);
+          try { const url = await uploadItemImage(file, item.id); await onSetImage(item.id, url); }
+          catch (err) { alert("Upload failed: " + err.message); }
+          setBusy(false);
+        };
+        return (
+          <div className="scrim" onClick={onClose} style={{ alignItems: "center" }}>
+            <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+              <div className="modal-head"><h3>{item.product}</h3><button className="rm" onClick={onClose}><X size={18} /></button></div>
+              <div style={{ background: "#0d1219", display: "flex", justifyContent: "center", maxHeight: "60vh", overflow: "hidden" }}>
+                <img src={item.imageUrl} alt={item.product} style={{ maxWidth: "100%", maxHeight: "60vh", objectFit: "contain" }} />
+              </div>
+              <div className="modal-foot" style={{ justifyContent: "space-between" }}>
+                <button className="rm" style={{ fontSize: 13, gap: 6, padding: "6px 8px", color: "var(--muted)" }} onClick={async () => { await onClearImage(item.id); onClose(); }}><Trash2 size={14} /> Remove photo</button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input ref={inputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onFile} />
+                  <button className="btn btn-ghost" onClick={() => inputRef.current && inputRef.current.click()} disabled={busy}>{busy ? "Uploading…" : "Replace photo"}</button>
+                  <button className="btn btn-primary" onClick={onClose}>Done</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
       function Metric({ k, v, tone }) { return (<div className="metric"><div className="k">{k}</div><div className="v mono" style={{ color: tone === "positive" ? "var(--positive)" : "var(--ink)" }}>{v}</div></div>); }
       function MiniStat({ k, v, tone }) {
         const color = tone === "positive" ? "var(--positive)" : tone === "accent" ? "var(--accent)" : "var(--ink)";
@@ -262,7 +332,7 @@
       /* ======================================================================
          Views
       ====================================================================== */
-      function StockLedger({ rows, query, setQuery, onRemove }) {
+      function StockLedger({ rows, query, setQuery, onRemove, onSetImage, onZoom }) {
         if (!rows.length) return (
           <div className="panel"><div className="empty"><b>No pieces match</b>{query ? "Nothing here for that search — clear it to see the full register." : "Add your first piece to start the register."}{query && <div style={{ marginTop: 12 }}><button className="btn btn-ghost" onClick={() => setQuery("")}>Clear search</button></div>}</div></div>
         );
@@ -270,15 +340,17 @@
           <div className="panel">
             <div style={{ overflowX: "auto" }}>
               <table className="ledger">
-                <thead><tr><th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th><th className="r">Purchase price</th><th className="r">List</th><th className="r">Sold</th><th className="r">Margin</th><th>Location</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th></th><th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th><th className="r">Purchase price</th><th className="r">Export cost</th><th className="r">List</th><th className="r">Sold</th><th className="r">Margin</th><th>Location</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   {rows.map((it) => (
                     <tr key={it.id}>
+                      <td style={{ paddingRight: 4 }}><Thumb item={it} onSetImage={onSetImage} onZoom={onZoom} /></td>
                       <td className="mono" style={{ color: "var(--muted)", fontSize: 12.5, whiteSpace: "nowrap" }}>{it.id}</td>
                       <td style={{ fontWeight: 550 }}>{it.product}</td>
                       <td style={{ color: "var(--muted)" }}>{it.collection}</td>
                       <td style={{ color: "var(--muted)" }}>{it.source}</td>
                       <td className="r mono">{money(it.purchase)}</td>
+                      <td className="r mono" style={{ color: "var(--muted)" }}>{it.apportioned ? money(it.apportioned) : "—"}</td>
                       <td className="r mono" style={{ color: "var(--muted)" }}>{it.listPrice ? money(it.listPrice) : "—"}</td>
                       <td className="r mono">{it.salePrice ? money(it.salePrice) : "—"}</td>
                       <td className="r mono" style={{ fontWeight: 600, color: it.margin != null ? "var(--positive)" : "var(--muted)" }}>{pct(it.margin)}</td>
@@ -450,13 +522,13 @@
       /* ======================================================================
          Forms
       ====================================================================== */
-      function Modal({ title, children, onClose, onSave }) {
+      function Modal({ title, children, onClose, onSave, saveLabel }) {
         return (
           <div className="scrim" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-head"><h3>{title}</h3><button className="rm" onClick={onClose}><X size={18} /></button></div>
               <div className="modal-body">{children}</div>
-              <div className="modal-foot"><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={onSave}>Save</button></div>
+              <div className="modal-foot"><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={onSave}>{saveLabel || "Save"}</button></div>
             </div>
           </div>
         );
@@ -466,17 +538,27 @@
 
       function ItemForm({ onClose, onSave, shipments, collections, existing }) {
         const [f, setF] = useState({ id: "", product: "", collection: collections[0]?.name || "", brand: collections[0]?.brand || "Villeroy & Boch", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
+        const [photo, setPhoto] = useState(null);
+        const [busy, setBusy] = useState(false);
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
-        const doSave = () => {
+        const doSave = async () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
           if (existing.some((x) => x.id === id)) { alert("That SKU already exists — give it a unique one."); return; }
           const isSold = f.status === "sold" && f.salePrice;
           const saleDate = f.saleDate || (isSold ? new Date().toISOString().slice(0, 10) : null);
-          onSave({ id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand, source: f.source, purchase: +f.purchase || 0, inbound: 0, status: f.status, location: f.location, listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null, saleDate, channel: f.channel || null, shipment: f.shipment || null });
+          let imageUrl = null;
+          if (photo) { setBusy(true); try { imageUrl = await uploadItemImage(photo, id); } catch (e) { alert("Photo upload failed: " + e.message); } setBusy(false); }
+          onSave({ id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand, source: f.source, purchase: +f.purchase || 0, inbound: 0, status: f.status, location: f.location, listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null, saleDate, channel: f.channel || null, shipment: f.shipment || null, imageUrl });
         };
         return (
-          <Modal title="Add a piece" onClose={onClose} onSave={doSave}>
+          <Modal title="Add a piece" onClose={onClose} onSave={doSave} saveLabel={busy ? "Uploading photo…" : "Save"}>
             <div className="frow"><F label="SKU" placeholder="VB-GRN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Greenland teapot" value={f.product} onChange={set("product")} /></div>
+            <label className="field"><span>Photo</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 5 }}>
+                {photo ? <img src={URL.createObjectURL(photo)} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)" }} /> : <div style={{ width: 48, height: 48, borderRadius: 7, border: "1px dashed #c7cfd8", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}><ImagePlus size={18} /></div>}
+                <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files && e.target.files[0])} style={{ fontSize: 12.5 }} />
+              </div>
+            </label>
             <div className="frow">
               <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
               <F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} />
@@ -528,6 +610,7 @@
         const [modal, setModal] = useState(null);
         const [query, setQuery] = useState("");
         const [statusFilter, setStatusFilter] = useState("all");
+        const [zoom, setZoom] = useState(null);
 
         const [items, setItems] = useState([]);
         const [shipments, setShipments] = useState([]);
@@ -580,6 +663,8 @@
         // Writes — go to Supabase; realtime refreshes every open instance.
         const addItem = async (it) => { setItems((xs) => [it, ...xs]); const { error } = await sb.from("pf_items").insert(itemToRow(it)); if (error) { alert("Save failed: " + error.message); loadAll(); } };
         const removeItem = async (id) => { setItems((xs) => xs.filter((x) => x.id !== id)); const { error } = await sb.from("pf_items").delete().eq("id", id); if (error) { alert("Remove failed: " + error.message); loadAll(); } };
+        const setItemImage = async (id, url) => { setItems((xs) => xs.map((x) => (x.id === id ? { ...x, imageUrl: url } : x))); setZoom((z) => (z && z.id === id ? { ...z, imageUrl: url } : z)); const { error } = await sb.from("pf_items").update({ image_url: url }).eq("id", id); if (error) { alert("Save failed: " + error.message); loadAll(); } };
+        const clearItemImage = async (id) => { setItems((xs) => xs.map((x) => (x.id === id ? { ...x, imageUrl: null } : x))); const { error } = await sb.from("pf_items").update({ image_url: null }).eq("id", id); if (error) { alert("Update failed: " + error.message); loadAll(); } };
         const addShipment = async (s) => { setShipments((xs) => [...xs, s]); const { error } = await sb.from("pf_shipments").insert(s); if (error) { alert("Save failed: " + error.message); loadAll(); } };
         const removeShipment = async (id) => {
           setShipments((xs) => xs.filter((x) => x.id !== id));
@@ -641,7 +726,7 @@
 
               <div className="content">
                 {loading ? <div className="loading">Loading stock from Supabase…</div> : (<>
-                  {tab === "stock" && <StockLedger rows={ledgerRows} query={query} setQuery={setQuery} onRemove={removeItem} />}
+                  {tab === "stock" && <StockLedger rows={ledgerRows} query={query} setQuery={setQuery} onRemove={removeItem} onSetImage={setItemImage} onZoom={setZoom} />}
                   {tab === "overview" && <Overview collections={collectionRollup} maxColMagnitude={maxColMagnitude} enriched={enriched} />}
                   {tab === "financials" && <Financials enriched={enriched} />}
                   {tab === "collections" && <Collections collections={collectionRollup} enriched={enriched} onAddCollection={addCollection} />}
@@ -652,6 +737,7 @@
 
             {modal === "item" && <ItemForm onClose={() => setModal(null)} onSave={(it) => { addItem(it); setModal(null); }} shipments={shipments} collections={collections} existing={items} />}
             {modal === "shipment" && <ShipmentForm onClose={() => setModal(null)} onSave={(s) => { addShipment(s); setModal(null); }} existing={shipments} />}
+            {zoom && zoom.imageUrl && <Lightbox item={zoom} onClose={() => setZoom(null)} onSetImage={setItemImage} onClearImage={clearItemImage} />}
           </div>
         );
       }
