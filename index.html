@@ -3,47 +3,204 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Porcelain Freaks — Vintage China Stock</title>
+    <title>Porcelain Freaks — Stock</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --rail: #161c26;
+        --rail-line: #29313d;
+        --rail-text: #aab4c1;
+        --rail-dim: #6c7889;
+        --canvas: #f4f6f8;
+        --surface: #ffffff;
+        --ink: #1b2430;
+        --muted: #67727f;
+        --line: #e3e7ec;
+        --line-soft: #eef1f4;
+        --accent: #2f6fb0;
+        --accent-ink: #245a92;
+        --accent-soft: #e9f1f9;
+        --positive: #2f7d5f;
+        --positive-soft: #e3f0e9;
+        --warn: #9a6a20;
+        --warn-soft: #f6ecd8;
+      }
 
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body, #root { height: 100%; }
 
       body {
-        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        background: #eceef2;
-        color: #16233f;
+        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+        background: var(--canvas);
+        color: var(--ink);
         -webkit-font-smoothing: antialiased;
+        font-size: 14px;
       }
 
-      button { cursor: pointer; border: none; font-family: inherit; }
-      input, select { font-family: inherit; outline: none; }
-      input:focus, select:focus { border-color: #243c86 !important; }
+      button { cursor: pointer; border: none; font-family: inherit; background: none; color: inherit; }
+      input, select { font-family: inherit; outline: none; color: var(--ink); }
+      input::placeholder { color: #9aa4b0; }
+      input:focus, select:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-soft); }
       table { border-spacing: 0; }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+      .num { font-variant-numeric: tabular-nums; }
 
-      /* Minimal layout utilities used across components */
-      .flex { display: flex; }
-      .grid { display: grid; }
-      .mx-auto { margin-left: auto; margin-right: auto; }
-      .items-center { align-items: center; }
-      .items-end { align-items: flex-end; }
-      .justify-between { justify-content: space-between; }
-      .justify-end { justify-content: flex-end; }
-      .gap-1 { gap: 4px; }
-      .gap-1\.5 { gap: 6px; }
-      .gap-2 { gap: 8px; }
-      .gap-3 { gap: 12px; }
-      .gap-6 { gap: 24px; }
+      /* ---- Shell -------------------------------------------------------- */
+      .app { display: flex; min-height: 100%; }
 
-      @media (max-width: 720px) {
-        .grid { grid-template-columns: 1fr !important; }
+      .rail {
+        width: 236px; flex-shrink: 0;
+        background: var(--rail); color: var(--rail-text);
+        display: flex; flex-direction: column;
+        position: sticky; top: 0; height: 100vh;
+      }
+      .brand { padding: 22px 20px 18px; border-bottom: 1px solid var(--rail-line); }
+      .brand-mark {
+        font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+        color: var(--rail-dim); font-weight: 600;
+      }
+      .brand-name {
+        font-size: 21px; font-weight: 700; color: #fff; margin-top: 5px;
+        letter-spacing: -0.01em; line-height: 1.05;
+      }
+      .brand-tally {
+        margin-top: 14px; display: flex; align-items: baseline; gap: 7px;
+      }
+      .brand-tally b { font-size: 20px; color: #fff; font-weight: 600; }
+      .brand-tally span { font-size: 11px; color: var(--rail-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+
+      .nav { padding: 12px 12px; display: flex; flex-direction: column; gap: 2px; }
+      .nav-item {
+        display: flex; align-items: center; gap: 11px;
+        padding: 9px 12px; border-radius: 7px; font-size: 13.5px; font-weight: 500;
+        color: var(--rail-text); border-left: 2px solid transparent; text-align: left; width: 100%;
+        transition: background .12s ease, color .12s ease;
+      }
+      .nav-item:hover { background: rgba(255,255,255,0.045); color: #e7ebf0; }
+      .nav-item.active { background: rgba(47,111,176,0.16); color: #fff; }
+      .nav-item .badge {
+        margin-left: auto; font-size: 11px; color: var(--rail-dim);
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .nav-item.active .badge { color: #cddcec; }
+
+      .rail-foot {
+        margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--rail-line);
+        font-size: 11px; color: var(--rail-dim); line-height: 1.55;
+      }
+      .rail-foot button {
+        color: var(--rail-text); font-size: 12px; display: inline-flex; align-items: center;
+        gap: 6px; margin-bottom: 10px; font-weight: 500;
+      }
+      .rail-foot button:hover { color: #fff; }
+
+      .workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+      /* ---- Toolbar ------------------------------------------------------ */
+      .toolbar {
+        display: flex; align-items: center; gap: 16px;
+        padding: 18px 26px; border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .toolbar h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+      .toolbar .sub { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+      .toolbar-actions { margin-left: auto; display: flex; gap: 8px; }
+
+      .btn {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 8px 13px; border-radius: 7px; font-size: 13px; font-weight: 550;
+      }
+      .btn-primary { background: var(--accent); color: #fff; }
+      .btn-primary:hover { background: var(--accent-ink); }
+      .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+      .btn-ghost:hover { background: var(--canvas); border-color: #cfd6de; }
+
+      .search {
+        display: flex; align-items: center; gap: 8px; flex: 1; max-width: 340px;
+        padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+      }
+      .search input { border: none; flex: 1; font-size: 13.5px; background: none; }
+      .search input:focus { box-shadow: none; }
+      .filter {
+        padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px;
+        background: var(--surface); font-size: 13px; font-weight: 500; color: var(--ink);
+      }
+
+      /* ---- Metrics strip ------------------------------------------------ */
+      .metrics {
+        display: flex; flex-wrap: wrap; align-items: stretch;
+        padding: 0 26px; border-bottom: 1px solid var(--line); background: var(--surface);
+      }
+      .metric { padding: 13px 26px 13px 0; margin-right: 26px; border-right: 1px solid var(--line-soft); }
+      .metric:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+      .metric .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; }
+      .metric .v { font-size: 19px; font-weight: 600; margin-top: 3px; letter-spacing: -0.01em; }
+
+      /* ---- Content ------------------------------------------------------ */
+      .content { padding: 22px 26px 40px; }
+
+      .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; }
+      .panel-head { padding: 15px 18px 13px; border-bottom: 1px solid var(--line-soft); }
+      .panel-head h3 { font-size: 14.5px; font-weight: 600; }
+      .panel-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+      .panel-body { padding: 16px 18px; }
+
+      /* ---- Ledger table ------------------------------------------------- */
+      .ledger { width: 100%; border-collapse: collapse; }
+      .ledger thead th {
+        text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--muted); font-weight: 600; padding: 0 14px 11px; white-space: nowrap;
+        border-bottom: 1px solid var(--line); background: var(--surface);
+      }
+      .ledger tbody td { padding: 11px 14px; border-bottom: 1px solid var(--line-soft); font-size: 13.5px; }
+      .ledger tbody tr:last-child td { border-bottom: none; }
+      .ledger tbody tr:hover td { background: #fafbfc; }
+      .r { text-align: right; }
+      .chip {
+        display: inline-block; padding: 3px 9px; border-radius: 6px;
+        font-size: 11.5px; font-weight: 600; white-space: nowrap; letter-spacing: 0.01em;
+      }
+      .rm { color: #a6afb9; padding: 4px; border-radius: 6px; display: inline-flex; }
+      .rm:hover { color: #d0453e; background: #fbe9e8; }
+
+      .empty { text-align: center; padding: 44px 20px; color: var(--muted); font-size: 13.5px; }
+      .empty b { color: var(--ink); display: block; font-size: 15px; margin-bottom: 4px; font-weight: 600; }
+
+      .grid2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
+      .grid-cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+
+      /* ---- Modal -------------------------------------------------------- */
+      .scrim { position: fixed; inset: 0; background: rgba(19,26,36,0.5); display: flex; align-items: flex-start; justify-content: center; padding: 7vh 16px; z-index: 50; }
+      .modal { background: var(--surface); border-radius: 12px; width: 100%; max-width: 560px; box-shadow: 0 24px 70px rgba(19,26,36,0.35); overflow: hidden; }
+      .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+      .modal-head h3 { font-size: 16px; font-weight: 600; }
+      .modal-body { padding: 18px 20px; max-height: 62vh; overflow-y: auto; }
+      .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--line); background: var(--canvas); }
+
+      .field { display: block; margin-bottom: 13px; }
+      .field span { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+      .field input, .field select { width: 100%; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); font-size: 13.5px; margin-top: 5px; }
+      .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+      @media (max-width: 860px) {
+        .rail { width: auto; height: auto; position: static; flex-direction: column; }
+        .app { flex-direction: column; }
+        .brand { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; }
+        .brand-tally { margin-top: 0; }
+        .nav { flex-direction: row; overflow-x: auto; padding: 8px 10px; }
+        .nav-item { white-space: nowrap; }
+        .nav-item .badge { display: none; }
+        .rail-foot { display: none; }
+        .grid2, .grid-cards { grid-template-columns: 1fr; }
+        .toolbar { flex-wrap: wrap; }
+        .search { max-width: none; order: 3; flex-basis: 100%; }
       }
     </style>
 
-    <!-- React, ReactDOM and lucide-react, loaded as ES modules from a CDN.
-         The import map lets the inlined code below use the same bare
-         imports ("react", "lucide-react") it used as a Vite project. -->
     <script type="importmap">
       {
         "imports": {
@@ -53,10 +210,6 @@
         }
       }
     </script>
-
-    <!-- Babel standalone transpiles the JSX in the browser, so there's no
-         build step. Good for a one-file drop-in; for heavier use you'd move
-         back to the Vite project. -->
     <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
   </head>
   <body>
@@ -66,73 +219,50 @@
       import React, { useState, useEffect, useMemo } from "react";
       import { createRoot } from "react-dom/client";
       import {
-        Package, Boxes, Layers, Truck, TrendingUp, Wallet, Archive,
-        Plus, RotateCcw, Ship, CircleDot, Trash2, X,
+        Boxes, LayoutGrid, Archive, Truck, Plus, Ship, Trash2, X,
+        Search, RotateCcw,
       } from "lucide-react";
 
       /* ======================================================================
-         theme.js
-         Palette rooted in the subject: underglaze cobalt, glaze white,
-         antique gilt hairlines. The gold rule is the signature, echoing
-         the gilt rim on a piece of fine china.
+         Status vocabulary + chip styling (cool, tool-register tones)
       ====================================================================== */
-      const C = {
-        ink: "#132a2e",        // deep teal-slate, near-black
-        cobalt: "#0e6f74",      // primary — deep petrol teal
-        cobaltSoft: "#3a9199",  // lighter teal for outlines
-        porcelain: "#eef1f2",   // cool porcelain background
-        surface: "#ffffff",
-        gilt: "#c46b45",        // signature accent — warm clay/copper
-        giltSoft: "#dda583",
-        slate: "#5c6f74",       // cool grey for secondary text
-        line: "#dbe3e4",
-        positive: "#2f7d5f",    // cool green for realised margins
-      };
-
       const STATUSES = ["sourced", "in transit", "with rep", "listed", "sold"];
-
       const STATUS_STYLE = {
-        sourced: { bg: "#eef0f4", fg: "#5c6b86" },
-        "in transit": { bg: "#fbf1df", fg: "#a9772a" },
-        "with rep": { bg: "#e6ecfb", fg: "#3a55a8" },
-        listed: { bg: "#e4e9f7", fg: "#243c86" },
-        sold: { bg: "#e5f0e7", fg: "#3f7a4d" },
+        sourced:      { bg: "#eef1f4", fg: "#67727f" },
+        "in transit": { bg: "#f6ecd8", fg: "#9a6a20" },
+        "with rep":   { bg: "#e9f1f9", fg: "#2f6fb0" },
+        listed:       { bg: "#e2edfa", fg: "#245a92" },
+        sold:         { bg: "#e3f0e9", fg: "#2f7d5f" },
       };
 
       /* ======================================================================
-         lib/calc.js — landed-cost engine + rollups
+         Formatting
       ====================================================================== */
       const money = (n) =>
-        (n < 0 ? "-" : "") +
-        "£" +
+        (n < 0 ? "-" : "") + "£" +
         Math.abs(n).toLocaleString("en-GB", { maximumFractionDigits: 0 });
+      const pct = (n) => (n === null || !isFinite(n) ? "—" : Math.round(n) + "%");
 
-      const pct = (n) =>
-        n === null || !isFinite(n) ? "—" : Math.round(n) + "%";
-
-      // A piece's true cost = what you paid the seller + its inbound shipping
-      // + its share of the parcel it travelled in (outbound + customs),
-      // apportioned across the parcel by value.
+      /* ======================================================================
+         Landed-cost engine + rollups  (unchanged model)
+         A piece's true cost = purchase + inbound shipping + its share of the
+         parcel it travelled in (outbound + customs), apportioned by value.
+      ====================================================================== */
       function enrich(items, shipments) {
         const shipTotals = {};
         items.forEach((it) => {
-          if (it.shipment)
-            shipTotals[it.shipment] = (shipTotals[it.shipment] || 0) + it.purchase;
+          if (it.shipment) shipTotals[it.shipment] = (shipTotals[it.shipment] || 0) + it.purchase;
         });
         const shipMap = Object.fromEntries(shipments.map((s) => [s.id, s]));
-
         return items.map((it) => {
           const s = it.shipment ? shipMap[it.shipment] : null;
-          let apportioned = 0;
-          let estimated = false;
+          let apportioned = 0, estimated = false;
           if (s) {
             const parcelCost = (s.outbound || 0) + (s.customs || 0);
-            const share = shipTotals[it.shipment]
-              ? it.purchase / shipTotals[it.shipment]
-              : 0;
+            const share = shipTotals[it.shipment] ? it.purchase / shipTotals[it.shipment] : 0;
             apportioned = parcelCost * share;
           } else if (it.status !== "sourced") {
-            estimated = true; // will travel, but parcel costs aren't logged yet
+            estimated = true;
           }
           const landed = it.purchase + (it.inbound || 0) + apportioned;
           const sold = it.status === "sold" && it.salePrice != null;
@@ -149,50 +279,25 @@
         const profit = sold.reduce((a, i) => a + i.profit, 0);
         const stockValue = stock.reduce((a, i) => a + i.landed, 0);
         const margins = sold.filter((i) => i.margin != null).map((i) => i.margin);
-        const avgMargin = margins.length
-          ? margins.reduce((a, b) => a + b, 0) / margins.length
-          : null;
-        return {
-          revenue,
-          profit,
-          stockValue,
-          inStock: stock.length,
-          soldCount: sold.length,
-          avgMargin,
-        };
+        const avgMargin = margins.length ? margins.reduce((a, b) => a + b, 0) / margins.length : null;
+        return { revenue, profit, stockValue, inStock: stock.length, soldCount: sold.length, avgMargin };
       }
 
       function byCollection(enriched) {
         const map = {};
         enriched.forEach((i) => {
           const key = i.collection || "Unassigned";
-          if (!map[key])
-            map[key] = {
-              name: key,
-              brand: i.brand,
-              inStock: 0,
-              sold: 0,
-              profit: 0,
-              stockValue: 0,
-            };
-          if (i.sold) {
-            map[key].sold++;
-            map[key].profit += i.profit;
-          } else {
-            map[key].inStock++;
-            map[key].stockValue += i.landed;
-          }
+          if (!map[key]) map[key] = { name: key, brand: i.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 };
+          if (i.sold) { map[key].sold++; map[key].profit += i.profit; }
+          else { map[key].inStock++; map[key].stockValue += i.landed; }
         });
-        return Object.values(map).sort(
-          (a, b) => b.inStock + b.sold - (a.inStock + a.sold)
-        );
+        return Object.values(map).sort((a, b) => b.inStock + b.sold - (a.inStock + a.sold));
       }
 
       /* ======================================================================
-         lib/storage.js — browser localStorage persistence
+         localStorage persistence
       ====================================================================== */
       const KEY = "porcelain-freaks:v1";
-
       function load() {
         try {
           const raw = localStorage.getItem(KEY);
@@ -200,32 +305,25 @@
           const parsed = JSON.parse(raw);
           if (!parsed || !parsed.items) return null;
           return parsed;
-        } catch {
-          return null;
-        }
+        } catch { return null; }
       }
-
       function save(data) {
-        try {
-          localStorage.setItem(KEY, JSON.stringify(data));
-        } catch {
-          /* storage full or unavailable — fail quietly, app keeps working in-memory */
-        }
+        try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {}
       }
 
       /* ======================================================================
-         data/seed.js — sample stock so the board reads as alive on first run
+         Seed stock so the register reads as alive on first run
       ====================================================================== */
       const SEED = {
         items: [
-          { id: "VB-BEN-001", product: "Benedikt teapot",        collection: "V&B Benedikt",                 brand: "Villeroy & Boch", source: "eBay UK",   purchase: 42, inbound: 6,  status: "listed",     listPrice: 210, salePrice: null, channel: null,    shipment: "P-001" },
-          { id: "VB-BEN-002", product: "Benedikt sugar bowl",    collection: "V&B Benedikt",                 brand: "Villeroy & Boch", source: "eBay UK",   purchase: 28, inbound: 5,  status: "listed",     listPrice: 150, salePrice: null, channel: null,    shipment: "P-001" },
-          { id: "VB-BEN-003", product: "Benedikt milk jug",      collection: "V&B Benedikt",                 brand: "Villeroy & Boch", source: "Vinted",    purchase: 22, inbound: 4,  status: "sold",       listPrice: 140, salePrice: 140,  channel: "Avito", shipment: "P-001" },
-          { id: "VB-BUN-014", product: "Bunny Family plate",     collection: "V&B Bunny Family",             brand: "Villeroy & Boch", source: "Leboncoin", purchase: 18, inbound: 7,  status: "sold",       listPrice: 95,  salePrice: 105,  channel: "Avito", shipment: "P-001" },
-          { id: "VB-BUN-015", product: "Bunny Family mug",       collection: "V&B Bunny Family",             brand: "Villeroy & Boch", source: "eBay UK",   purchase: 15, inbound: 4,  status: "with rep",   listPrice: 80,  salePrice: null, channel: null,    shipment: "P-002" },
-          { id: "RD-BH-031",  product: "Brambly Hedge teapot",   collection: "Royal Doulton Brambly Hedge",  brand: "Royal Doulton",   source: "eBay UK",   purchase: 55, inbound: 8,  status: "listed",     listPrice: 260, salePrice: null, channel: null,    shipment: "P-002" },
+          { id: "VB-BEN-001", product: "Benedikt teapot",        collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "eBay UK",   purchase: 42, inbound: 6,  status: "listed",     listPrice: 210, salePrice: null, channel: null,    shipment: "P-001" },
+          { id: "VB-BEN-002", product: "Benedikt sugar bowl",    collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "eBay UK",   purchase: 28, inbound: 5,  status: "listed",     listPrice: 150, salePrice: null, channel: null,    shipment: "P-001" },
+          { id: "VB-BEN-003", product: "Benedikt milk jug",      collection: "V&B Benedikt",                brand: "Villeroy & Boch", source: "Vinted",    purchase: 22, inbound: 4,  status: "sold",       listPrice: 140, salePrice: 140,  channel: "Avito", shipment: "P-001" },
+          { id: "VB-BUN-014", product: "Bunny Family plate",     collection: "V&B Bunny Family",            brand: "Villeroy & Boch", source: "Leboncoin", purchase: 18, inbound: 7,  status: "sold",       listPrice: 95,  salePrice: 105,  channel: "Avito", shipment: "P-001" },
+          { id: "VB-BUN-015", product: "Bunny Family mug",       collection: "V&B Bunny Family",            brand: "Villeroy & Boch", source: "eBay UK",   purchase: 15, inbound: 4,  status: "with rep",   listPrice: 80,  salePrice: null, channel: null,    shipment: "P-002" },
+          { id: "RD-BH-031",  product: "Brambly Hedge teapot",   collection: "Royal Doulton Brambly Hedge", brand: "Royal Doulton",   source: "eBay UK",   purchase: 55, inbound: 8,  status: "listed",     listPrice: 260, salePrice: null, channel: null,    shipment: "P-002" },
           { id: "RD-BH-032",  product: "Brambly Hedge cup & saucer", collection: "Royal Doulton Brambly Hedge", brand: "Royal Doulton", source: "Subito.it", purchase: 30, inbound: 9, status: "in transit", listPrice: 130, salePrice: null, channel: null, shipment: "P-002" },
-          { id: "CH-BUT-004", product: "Christofle butter dish", collection: "Christofle silver",            brand: "Christofle",      source: "eBay UK",   purchase: 60, inbound: 10, status: "sourced",    listPrice: 320, salePrice: null, channel: null,    shipment: null },
+          { id: "CH-BUT-004", product: "Christofle butter dish", collection: "Christofle silver",           brand: "Christofle",      source: "eBay UK",   purchase: 60, inbound: 10, status: "sourced",    listPrice: 320, salePrice: null, channel: null,    shipment: null },
         ],
         shipments: [
           { id: "P-001", date: "2026-06-14", outbound: 45, customs: 38, note: "Mixed china batch → Moscow" },
@@ -234,286 +332,253 @@
       };
 
       /* ======================================================================
-         components/ui.jsx — buttons, KPI, cards, form fields
+         Small building blocks
       ====================================================================== */
-      const btnPrimary = { background: C.cobalt, color: "#fff", padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600 };
-      const btnGhost = { background: C.surface, color: C.cobalt, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, border: `1px solid ${C.line}` };
+      const Chip = ({ status }) => {
+        const st = STATUS_STYLE[status] || STATUS_STYLE.sourced;
+        return <span className="chip" style={{ background: st.bg, color: st.fg }}>{status}</span>;
+      };
 
-      function Kpi({ icon, label, value, sub, accent }) {
+      function Metric({ k, v, tone }) {
+        const color = tone === "positive" ? "var(--positive)" : "var(--ink)";
         return (
-          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderTop: `2px solid ${accent ? C.gilt : C.cobalt}`, borderRadius: 4, padding: "12px 14px" }}>
-            <div className="flex items-center gap-1.5" style={{ color: C.slate, fontSize: 11.5, fontWeight: 600 }}>{icon}{label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, marginTop: 6, color: accent ? C.gilt : C.ink, fontFamily: "ui-monospace, monospace" }}>{value}</div>
-            {sub && <div style={{ fontSize: 10.5, color: C.slate, marginTop: 1 }}>{sub}</div>}
+          <div className="metric">
+            <div className="k">{k}</div>
+            <div className="v mono" style={{ color }}>{v}</div>
           </div>
         );
-      }
-
-      function Card({ title, hint, children }) {
-        return (
-          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 6, padding: "16px 18px" }}>
-            <div style={{ borderLeft: `2px solid ${C.gilt}`, paddingLeft: 10 }}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: 16, color: C.ink }}>{title}</div>
-              {hint && <div style={{ fontSize: 12, color: C.slate, marginTop: 2 }}>{hint}</div>}
-            </div>
-            <div style={{ marginTop: 12 }}>{children}</div>
-          </div>
-        );
-      }
-
-      function Stat({ label, value, accent }) {
-        return (
-          <div>
-            <div style={{ fontSize: 11, color: C.slate, textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: accent ? C.gilt : C.ink, fontFamily: "ui-monospace, monospace", marginTop: 2 }}>{value}</div>
-          </div>
-        );
-      }
-
-      const inputStyle = { width: "100%", padding: "8px 10px", borderRadius: 5, border: `1px solid ${C.line}`, background: C.surface, fontSize: 13, color: C.ink, marginTop: 4 };
-      const labelStyle = { fontSize: 11.5, fontWeight: 600, color: C.slate, textTransform: "uppercase", letterSpacing: "0.03em" };
-
-      function Field({ label, ...props }) {
-        return (
-          <label style={{ display: "block", marginBottom: 12 }}>
-            <span style={labelStyle}>{label}</span>
-            <input {...props} style={inputStyle} />
-          </label>
-        );
-      }
-
-      function Select({ label, value, onChange, options, optionLabels = {} }) {
-        return (
-          <label style={{ display: "block", marginBottom: 12 }}>
-            <span style={labelStyle}>{label}</span>
-            <select value={value} onChange={onChange} style={inputStyle}>
-              {options.map((o) => (
-                <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>
-              ))}
-            </select>
-          </label>
-        );
-      }
-
-      function Row({ children }) {
-        return <div className="grid gap-3" style={{ gridTemplateColumns: "1fr 1fr", marginBottom: 12 }}>{children}</div>;
       }
 
       /* ======================================================================
-         components/panels.jsx — Overview, Inventory, Collections, Shipments
+         Views
       ====================================================================== */
+      function StockLedger({ rows, query, setQuery, onRemove }) {
+        if (!rows.length) {
+          return (
+            <div className="panel">
+              <div className="empty">
+                <b>No pieces match</b>
+                {query ? "Nothing here for that search — clear it to see the full register." : "Add your first piece to start the register."}
+                {query && <div style={{ marginTop: 12 }}><button className="btn btn-ghost" onClick={() => setQuery("")}>Clear search</button></div>}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="panel">
+            <div style={{ overflowX: "auto" }}>
+              <table className="ledger">
+                <thead>
+                  <tr>
+                    <th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th>
+                    <th className="r">Landed</th><th className="r">List</th>
+                    <th className="r">Sold</th><th className="r">Margin</th>
+                    <th>Status</th><th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((it) => (
+                    <tr key={it.id}>
+                      <td className="mono" style={{ color: "var(--muted)", fontSize: 12.5, whiteSpace: "nowrap" }}>{it.id}</td>
+                      <td style={{ fontWeight: 550 }}>{it.product}</td>
+                      <td style={{ color: "var(--muted)" }}>{it.collection}</td>
+                      <td style={{ color: "var(--muted)" }}>{it.source}</td>
+                      <td className="r mono">
+                        {money(it.landed)}
+                        {it.estimated && <span title="parcel costs not yet logged — margin not final" style={{ color: "var(--warn)", marginLeft: 3 }}>*</span>}
+                      </td>
+                      <td className="r mono" style={{ color: "var(--muted)" }}>{it.listPrice ? money(it.listPrice) : "—"}</td>
+                      <td className="r mono">{it.salePrice ? money(it.salePrice) : "—"}</td>
+                      <td className="r mono" style={{ fontWeight: 600, color: it.margin != null ? "var(--positive)" : "var(--muted)" }}>{pct(it.margin)}</td>
+                      <td><Chip status={it.status} /></td>
+                      <td><button className="rm" title="Remove piece" onClick={() => onRemove(it.id)}><Trash2 size={15} /></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ padding: "11px 16px", borderTop: "1px solid var(--line-soft)", fontSize: 11.5, color: "var(--muted)" }}>
+              <span style={{ color: "var(--warn)" }}>*</span> estimate — the piece will travel but its parcel costs aren't logged yet, so its margin isn't settled.
+            </div>
+          </div>
+        );
+      }
+
       function Overview({ collections, maxColMagnitude, enriched }) {
         const pipeline = STATUSES.map((s) => ({ s, n: enriched.filter((i) => i.status === s).length }));
         const maxPipe = Math.max(1, ...pipeline.map((p) => p.n));
         return (
-          <div className="grid gap-3" style={{ gridTemplateColumns: "1.4fr 1fr" }}>
-            <Card title="Collections at a glance" hint="Bar length = pieces held or sold. Filled = sold, outline = in stock.">
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 4 }}>
+          <div className="grid2">
+            <div className="panel">
+              <div className="panel-head"><h3>Collections at a glance</h3><p>Bar length = pieces held or sold. Filled portion is sold.</p></div>
+              <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: 15 }}>
                 {collections.map((c) => {
                   const total = c.inStock + c.sold;
                   const w = (total / maxColMagnitude) * 100;
                   const soldW = total ? (c.sold / total) * 100 : 0;
                   return (
                     <div key={c.name}>
-                      <div className="flex justify-between" style={{ fontSize: 13, marginBottom: 5 }}>
-                        <span style={{ fontWeight: 600 }}>{c.name}</span>
-                        <span style={{ color: C.slate }}>{c.inStock} in stock · {c.sold} sold</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                        <span style={{ fontWeight: 550 }}>{c.name}</span>
+                        <span className="mono" style={{ color: "var(--muted)", fontSize: 12 }}>{c.inStock} on hand · {c.sold} sold</span>
                       </div>
-                      <div style={{ height: 10, width: `${w}%`, minWidth: 24, background: C.surface, border: `1px solid ${C.cobaltSoft}`, borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${soldW}%`, background: C.cobalt }} />
+                      <div style={{ height: 9, width: `${w}%`, minWidth: 22, background: "var(--surface)", border: "1px solid var(--accent)", borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${soldW}%`, background: "var(--accent)" }} />
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </Card>
-
-            <Card title="Where the stock is" hint="Pieces by stage of the journey.">
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 4 }}>
+            </div>
+            <div className="panel">
+              <div className="panel-head"><h3>Where the stock is</h3><p>Pieces by stage of the journey.</p></div>
+              <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {pipeline.map(({ s, n }) => (
-                  <div key={s} className="flex items-center gap-3">
-                    <span style={{ width: 78, fontSize: 12.5, color: C.slate, textTransform: "capitalize" }}>{s}</span>
-                    <div style={{ flex: 1, height: 22, background: C.porcelain, borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(n / maxPipe) * 100}%`, minWidth: n ? 22 : 0, background: STATUS_STYLE[s].bg, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_STYLE[s].fg }}>{n || ""}</span>
+                  <div key={s} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ width: 84, fontSize: 12.5, color: "var(--muted)", textTransform: "capitalize" }}>{s}</span>
+                    <div style={{ flex: 1, height: 24, background: "var(--canvas)", borderRadius: 5, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(n / maxPipe) * 100}%`, minWidth: n ? 24 : 0, background: STATUS_STYLE[s].bg, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 9 }}>
+                        <span className="mono" style={{ fontSize: 12, fontWeight: 600, color: STATUS_STYLE[s].fg }}>{n || ""}</span>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
-        );
-      }
-
-      function Inventory({ enriched, onRemove }) {
-        return (
-          <Card title="Inventory" hint="Each row is one physical piece. Margin appears once it's sold and its parcel costs are known.">
-            <div style={{ overflowX: "auto", marginTop: 6 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ textAlign: "left", color: C.slate, borderBottom: `1px solid ${C.line}` }}>
-                    {["Piece", "Collection", "Source", "Landed", "List", "Sold", "Margin", "Status", ""].map((h, i) => (
-                      <th key={i} style={{ padding: "8px 10px", fontWeight: 600, whiteSpace: "nowrap", fontSize: 11.5, letterSpacing: "0.04em", textTransform: "uppercase" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {enriched.map((it) => {
-                    const st = STATUS_STYLE[it.status] || STATUS_STYLE.sourced;
-                    return (
-                      <tr key={it.id} style={{ borderBottom: `1px solid ${C.line}` }}>
-                        <td style={{ padding: "9px 10px" }}>
-                          <div style={{ fontWeight: 600 }}>{it.product}</div>
-                          <div style={{ fontSize: 11, color: C.slate, fontFamily: "ui-monospace, monospace" }}>{it.id}</div>
-                        </td>
-                        <td style={{ padding: "9px 10px", color: C.slate }}>{it.collection}</td>
-                        <td style={{ padding: "9px 10px", color: C.slate }}>{it.source}</td>
-                        <td style={{ padding: "9px 10px", fontFamily: "ui-monospace, monospace" }}>
-                          {money(it.landed)}
-                          {it.estimated && <span title="parcel costs not yet logged" style={{ color: C.gilt, marginLeft: 4 }}>*</span>}
-                        </td>
-                        <td style={{ padding: "9px 10px", color: C.slate, fontFamily: "ui-monospace, monospace" }}>{it.listPrice ? money(it.listPrice) : "—"}</td>
-                        <td style={{ padding: "9px 10px", fontFamily: "ui-monospace, monospace" }}>{it.salePrice ? money(it.salePrice) : "—"}</td>
-                        <td style={{ padding: "9px 10px", fontFamily: "ui-monospace, monospace", fontWeight: 700, color: it.margin != null ? "#3f7a4d" : C.slate }}>{pct(it.margin)}</td>
-                        <td style={{ padding: "9px 10px" }}>
-                          <span style={{ background: st.bg, color: st.fg, padding: "3px 9px", borderRadius: 20, fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap" }}>{it.status}</span>
-                        </td>
-                        <td style={{ padding: "9px 10px" }}>
-                          <button onClick={() => onRemove(it.id)} style={{ color: C.slate, background: "none" }} title="Remove"><Trash2 size={14} /></button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ fontSize: 11.5, color: C.slate, marginTop: 10 }}>
-              <span style={{ color: C.gilt }}>*</span> estimate — this piece will travel but its parcel costs aren't logged yet, so its final margin isn't settled.
-            </div>
-          </Card>
         );
       }
 
       function Collections({ collections, enriched }) {
         return (
-          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(2, minmax(0,1fr))" }}>
+          <div className="grid-cards">
             {collections.map((c) => {
               const pieces = enriched.filter((i) => (i.collection || "Unassigned") === c.name);
               return (
-                <Card key={c.name} title={c.name} hint={c.brand}>
-                  <div className="flex gap-6" style={{ margin: "6px 0 12px" }}>
-                    <Stat label="In stock" value={c.inStock} />
-                    <Stat label="Sold" value={c.sold} />
-                    <Stat label="Profit" value={money(c.profit)} accent />
-                    <Stat label="Held value" value={money(c.stockValue)} />
+                <div key={c.name} className="panel">
+                  <div className="panel-head">
+                    <h3>{c.name}</h3><p>{c.brand}</p>
                   </div>
-                  <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>
-                    {pieces.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between" style={{ fontSize: 12.5, padding: "3px 0" }}>
-                        <span>{p.product}</span>
-                        <span style={{ color: STATUS_STYLE[p.status].fg, fontWeight: 600, fontSize: 11.5 }}>{p.status}</span>
-                      </div>
-                    ))}
+                  <div className="panel-body">
+                    <div style={{ display: "flex", gap: 22, marginBottom: 14 }}>
+                      <MiniStat k="On hand" v={c.inStock} />
+                      <MiniStat k="Sold" v={c.sold} />
+                      <MiniStat k="Profit" v={money(c.profit)} tone="positive" />
+                      <MiniStat k="Held value" v={money(c.stockValue)} />
+                    </div>
+                    <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
+                      {pieces.map((p) => (
+                        <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}>
+                          <span>{p.product}</span>
+                          <span style={{ color: STATUS_STYLE[p.status].fg, fontWeight: 600, fontSize: 11.5 }}>{p.status}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </Card>
+                </div>
               );
             })}
           </div>
         );
       }
 
-      function Shipments({ shipments, enriched, onRemove }) {
+      function Parcels({ shipments, enriched, onRemove }) {
         return (
-          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(2, minmax(0,1fr))" }}>
+          <div className="grid-cards">
             {shipments.map((s) => {
               const pieces = enriched.filter((i) => i.shipment === s.id);
               const parcelCost = (s.outbound || 0) + (s.customs || 0);
               return (
-                <Card key={s.id} title={s.id} hint={s.note}>
-                  <div className="flex gap-6" style={{ margin: "6px 0 12px" }}>
-                    <Stat label="Outbound" value={money(s.outbound)} />
-                    <Stat label="Customs" value={money(s.customs)} />
-                    <Stat label="Parcel total" value={money(parcelCost)} accent />
-                    <Stat label="Pieces" value={pieces.length} />
+                <div key={s.id} className="panel">
+                  <div className="panel-head" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                    <div><h3 className="mono">{s.id}</h3><p>{s.note}</p></div>
+                    <span style={{ fontSize: 11.5, color: "var(--muted)" }}>Sent {s.date}</span>
                   </div>
-                  <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>
-                    {pieces.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between" style={{ fontSize: 12.5, padding: "3px 0" }}>
-                        <span>{p.product}</span>
-                        <span style={{ color: C.slate, fontFamily: "ui-monospace, monospace" }}>+{money(p.apportioned)} share</span>
-                      </div>
-                    ))}
-                    {!pieces.length && <div style={{ fontSize: 12, color: C.slate }}>No pieces assigned to this parcel yet.</div>}
+                  <div className="panel-body">
+                    <div style={{ display: "flex", gap: 22, marginBottom: 14 }}>
+                      <MiniStat k="Outbound" v={money(s.outbound)} />
+                      <MiniStat k="Customs" v={money(s.customs)} />
+                      <MiniStat k="Parcel total" v={money(parcelCost)} tone="accent" />
+                      <MiniStat k="Pieces" v={pieces.length} />
+                    </div>
+                    <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
+                      {pieces.map((p) => (
+                        <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}>
+                          <span>{p.product}</span>
+                          <span className="mono" style={{ color: "var(--muted)" }}>+{money(p.apportioned)} share</span>
+                        </div>
+                      ))}
+                      {!pieces.length && <div style={{ fontSize: 12, color: "var(--muted)" }}>No pieces assigned to this parcel yet.</div>}
+                    </div>
+                    <button className="rm" style={{ marginTop: 12, fontSize: 12, gap: 6, padding: "4px 6px", color: "var(--muted)" }} onClick={() => onRemove(s.id)}>
+                      <Trash2 size={13} /> Remove parcel
+                    </button>
                   </div>
-                  <div style={{ marginTop: 10, fontSize: 11.5, color: C.slate }}>Sent {s.date}</div>
-                  <button onClick={() => onRemove(s.id)} className="flex items-center gap-1" style={{ color: C.slate, background: "none", fontSize: 12, marginTop: 8 }}>
-                    <Trash2 size={13} /> Remove parcel
-                  </button>
-                </Card>
+                </div>
               );
             })}
+          </div>
+        );
+      }
+
+      function MiniStat({ k, v, tone }) {
+        const color = tone === "positive" ? "var(--positive)" : tone === "accent" ? "var(--accent)" : "var(--ink)";
+        return (
+          <div>
+            <div style={{ fontSize: 10.5, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{k}</div>
+            <div className="mono" style={{ fontSize: 16, fontWeight: 600, color, marginTop: 3 }}>{v}</div>
           </div>
         );
       }
 
       /* ======================================================================
-         components/forms.jsx — Modal, ItemForm, ShipmentForm
+         Forms
       ====================================================================== */
       function Modal({ title, children, onClose, onSave }) {
         return (
-          <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(22,35,63,0.4)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "6vh 16px", zIndex: 50 }}>
-            <div onClick={(e) => e.stopPropagation()} style={{ background: C.porcelain, borderRadius: 8, width: "100%", maxWidth: 540, boxShadow: "0 20px 60px rgba(22,35,63,0.3)", border: `1px solid ${C.line}` }}>
-              <div className="flex items-center justify-between" style={{ padding: "16px 20px", borderBottom: `2px solid ${C.gilt}` }}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: 19 }}>{title}</div>
-                <button onClick={onClose} style={{ background: "none", color: C.slate }}><X size={18} /></button>
+          <div className="scrim" onClick={onClose}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-head">
+                <h3>{title}</h3>
+                <button className="rm" onClick={onClose}><X size={18} /></button>
               </div>
-              <div style={{ padding: "18px 20px", maxHeight: "62vh", overflowY: "auto" }}>{children}</div>
-              <div className="flex justify-end gap-2" style={{ padding: "14px 20px", borderTop: `1px solid ${C.line}` }}>
-                <button onClick={onClose} style={btnGhost}>Cancel</button>
-                <button onClick={onSave} style={btnPrimary}>Save</button>
+              <div className="modal-body">{children}</div>
+              <div className="modal-foot">
+                <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+                <button className="btn btn-primary" onClick={onSave}>Save</button>
               </div>
             </div>
           </div>
         );
       }
 
+      const F = ({ label, ...p }) => (
+        <label className="field"><span>{label}</span><input {...p} /></label>
+      );
+      const S = ({ label, value, onChange, options, optionLabels = {} }) => (
+        <label className="field"><span>{label}</span>
+          <select value={value} onChange={onChange}>
+            {options.map((o) => <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>)}
+          </select>
+        </label>
+      );
+
       function ItemForm({ onClose, onSave, shipments, existing }) {
-        const [f, setF] = useState({
-          id: "", product: "", collection: "", brand: "", source: "eBay UK",
-          purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", channel: "", shipment: "",
-        });
+        const [f, setF] = useState({ id: "", product: "", collection: "", brand: "", source: "eBay UK", purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", channel: "", shipment: "" });
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
         const doSave = () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
-          if (existing.some((x) => x.id === id)) { alert("That piece code already exists — give it a unique one."); return; }
-          onSave({
-            id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand,
-            source: f.source, purchase: +f.purchase || 0, inbound: +f.inbound || 0, status: f.status,
-            listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null,
-            channel: f.channel || null, shipment: f.shipment || null,
-          });
+          if (existing.some((x) => x.id === id)) { alert("That SKU already exists — give it a unique one."); return; }
+          onSave({ id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand, source: f.source, purchase: +f.purchase || 0, inbound: +f.inbound || 0, status: f.status, listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null, channel: f.channel || null, shipment: f.shipment || null });
         };
         return (
           <Modal title="Add a piece" onClose={onClose} onSave={doSave}>
-            <Row><Field label="Piece code" placeholder="VB-BEN-004 (auto if blank)" value={f.id} onChange={set("id")} /><Field label="Product / model" placeholder="Benedikt teapot" value={f.product} onChange={set("product")} /></Row>
-            <Row><Field label="Collection" placeholder="V&B Benedikt" value={f.collection} onChange={set("collection")} /><Field label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} /></Row>
-            <Row>
-              <Select label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} />
-              <Field label="Purchase price (£)" type="number" value={f.purchase} onChange={set("purchase")} />
-            </Row>
-            <Row>
-              <Field label="Inbound shipping (£)" type="number" value={f.inbound} onChange={set("inbound")} />
-              <Select label="Status" value={f.status} onChange={set("status")} options={STATUSES} />
-            </Row>
-            <Row>
-              <Field label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} />
-              <Field label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} />
-            </Row>
-            <Row>
-              <Field label="Sale channel" placeholder="Avito" value={f.channel} onChange={set("channel")} />
-              <Select label="Parcel" value={f.shipment} onChange={set("shipment")} options={["", ...shipments.map((s) => s.id)]} optionLabels={{ "": "— none yet —" }} />
-            </Row>
+            <div className="frow"><F label="SKU" placeholder="VB-BEN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Benedikt teapot" value={f.product} onChange={set("product")} /></div>
+            <div className="frow"><F label="Collection" placeholder="V&B Benedikt" value={f.collection} onChange={set("collection")} /><F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} /></div>
+            <div className="frow"><S label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" value={f.purchase} onChange={set("purchase")} /></div>
+            <div className="frow"><F label="Inbound shipping (£)" type="number" value={f.inbound} onChange={set("inbound")} /><S label="Status" value={f.status} onChange={set("status")} options={STATUSES} /></div>
+            <div className="frow"><F label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} /><F label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} /></div>
+            <div className="frow"><F label="Sale channel" placeholder="Avito" value={f.channel} onChange={set("channel")} /><S label="Parcel" value={f.shipment} onChange={set("shipment")} options={["", ...shipments.map((s) => s.id)]} optionLabels={{ "": "— none yet —" }} /></div>
           </Modal>
         );
       }
@@ -528,27 +593,40 @@
         };
         return (
           <Modal title="Log a parcel" onClose={onClose} onSave={doSave}>
-            <Row><Field label="Parcel code" placeholder="P-003 (auto if blank)" value={f.id} onChange={set("id")} /><Field label="Date sent" type="date" value={f.date} onChange={set("date")} /></Row>
-            <Row><Field label="Outbound shipping (£)" type="number" value={f.outbound} onChange={set("outbound")} /><Field label="Customs paid (£)" type="number" value={f.customs} onChange={set("customs")} /></Row>
-            <Field label="Note" placeholder="What's in it / anything customs did" value={f.note} onChange={set("note")} />
-            <div style={{ fontSize: 12, color: C.slate, marginTop: 10 }}>
-              Assign pieces to this parcel from each piece's record. Its outbound + customs cost then spreads across those pieces by value.
-            </div>
+            <div className="frow"><F label="Parcel code" placeholder="P-003 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Date sent" type="date" value={f.date} onChange={set("date")} /></div>
+            <div className="frow"><F label="Outbound shipping (£)" type="number" value={f.outbound} onChange={set("outbound")} /><F label="Customs paid (£)" type="number" value={f.customs} onChange={set("customs")} /></div>
+            <F label="Note" placeholder="What's in it / anything customs did" value={f.note} onChange={set("note")} />
+            <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>Assign pieces to this parcel from each piece's record. Its outbound + customs cost then spreads across those pieces by value.</div>
           </Modal>
         );
       }
 
       /* ======================================================================
-         App.jsx — masthead, KPI band, tabs, panels, modals
+         App shell
       ====================================================================== */
+      const NAV = [
+        ["stock", "Stock", Boxes],
+        ["overview", "Overview", LayoutGrid],
+        ["collections", "Collections", Archive],
+        ["parcels", "Parcels", Truck],
+      ];
+
+      const VIEW_META = {
+        stock:       { title: "Stock register", sub: "Every physical piece, from source to sold." },
+        overview:    { title: "Overview", sub: "How the stock and the money are moving." },
+        collections: { title: "Collections", sub: "Series buyers are trying to complete." },
+        parcels:     { title: "Parcels", sub: "Batches to Moscow, with real customs apportioned by value." },
+      };
+
       function App() {
-        const [tab, setTab] = useState("overview");
-        const [modal, setModal] = useState(null); // 'item' | 'shipment' | null
+        const [tab, setTab] = useState("stock");
+        const [modal, setModal] = useState(null);
+        const [query, setQuery] = useState("");
+        const [statusFilter, setStatusFilter] = useState("all");
 
         const initial = load();
         const [items, setItems] = useState(initial?.items ?? SEED.items);
         const [shipments, setShipments] = useState(initial?.shipments ?? SEED.shipments);
-
         useEffect(() => { save({ items, shipments }); }, [items, shipments]);
 
         const enriched = useMemo(() => enrich(items, shipments), [items, shipments]);
@@ -556,84 +634,98 @@
         const collections = useMemo(() => byCollection(enriched), [enriched]);
         const maxColMagnitude = Math.max(1, ...collections.map((c) => c.inStock + c.sold));
 
+        const ledgerRows = useMemo(() => {
+          const q = query.trim().toLowerCase();
+          return enriched.filter((it) => {
+            if (statusFilter !== "all" && it.status !== statusFilter) return false;
+            if (!q) return true;
+            return [it.id, it.product, it.collection, it.source, it.brand]
+              .filter(Boolean).some((v) => v.toLowerCase().includes(q));
+          });
+        }, [enriched, query, statusFilter]);
+
         const removeItem = (id) => setItems((xs) => xs.filter((x) => x.id !== id));
         const removeShipment = (id) => {
           setShipments((xs) => xs.filter((x) => x.id !== id));
           setItems((xs) => xs.map((x) => (x.shipment === id ? { ...x, shipment: null } : x)));
         };
-        const resetSeed = () => { setItems(SEED.items); setShipments(SEED.shipments); };
+        const resetSeed = () => { setItems(SEED.items); setShipments(SEED.shipments); setQuery(""); setStatusFilter("all"); };
+
+        const meta = VIEW_META[tab];
 
         return (
-          <div style={{ background: C.porcelain, minHeight: "100%" }}>
-            <div className="mx-auto" style={{ maxWidth: 1120, padding: "28px 20px 48px" }}>
-              {/* Masthead */}
-              <header className="flex items-end justify-between" style={{ borderBottom: `2px solid ${C.gilt}`, paddingBottom: 14 }}>
+          <div className="app">
+            {/* Operations rail */}
+            <aside className="rail">
+              <div className="brand">
                 <div>
-                  <div style={{ letterSpacing: "0.32em", fontSize: 11, color: C.gilt, fontWeight: 600 }}>
-                    VINTAGE CHINA · SILVER · STOCK REGISTRY
-                  </div>
-                  <h1 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 34, lineHeight: 1.05, marginTop: 6, color: C.ink }}>
-                    Porcelain Freaks
-                  </h1>
-                  <div style={{ color: C.slate, fontSize: 13, marginTop: 4 }}>
-                    Every piece, from source to sold — with the real landed cost behind each margin.
-                  </div>
+                  <div className="brand-mark">Stock system</div>
+                  <div className="brand-name">Porcelain Freaks</div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => setModal("shipment")} className="flex items-center gap-1" style={btnGhost}>
-                    <Ship size={15} /> Log parcel
-                  </button>
-                  <button onClick={() => setModal("item")} className="flex items-center gap-1" style={btnPrimary}>
-                    <Plus size={15} /> Add piece
-                  </button>
+                <div className="brand-tally">
+                  <b className="mono">{kpi.inStock}</b><span>on hand</span>
                 </div>
-              </header>
-
-              {/* KPI band */}
-              <section className="grid gap-3" style={{ gridTemplateColumns: "repeat(6, minmax(0,1fr))", marginTop: 20 }}>
-                <Kpi icon={<TrendingUp size={16} />} label="Revenue"     value={money(kpi.revenue)} />
-                <Kpi icon={<Wallet size={16} />}     label="Profit"      value={money(kpi.profit)} accent />
-                <Kpi icon={<Archive size={16} />}    label="Stock value" value={money(kpi.stockValue)} sub="capital tied up" />
-                <Kpi icon={<Boxes size={16} />}      label="In stock"    value={kpi.inStock} />
-                <Kpi icon={<Package size={16} />}    label="Sold"        value={kpi.soldCount} />
-                <Kpi icon={<CircleDot size={16} />}  label="Avg margin"  value={pct(kpi.avgMargin)} />
-              </section>
-
-              {/* Tabs */}
-              <nav className="flex gap-1" style={{ marginTop: 24, borderBottom: `1px solid ${C.line}` }}>
-                {[
-                  ["overview", "Overview", <Layers size={15} />],
-                  ["inventory", "Inventory", <Boxes size={15} />],
-                  ["collections", "Collections", <Archive size={15} />],
-                  ["shipments", "Parcels", <Truck size={15} />],
-                ].map(([key, label, icon]) => (
-                  <button key={key} onClick={() => setTab(key)} className="flex items-center gap-2"
-                    style={{
-                      padding: "9px 16px", fontSize: 13.5, fontWeight: 600,
-                      color: tab === key ? C.cobalt : C.slate,
-                      borderBottom: tab === key ? `2px solid ${C.cobalt}` : "2px solid transparent",
-                      marginBottom: -1, background: "none",
-                    }}>
-                    {icon}{label}
-                  </button>
-                ))}
+              </div>
+              <nav className="nav">
+                {NAV.map(([key, label, Icon]) => {
+                  const count = key === "stock" ? items.length
+                    : key === "collections" ? collections.length
+                    : key === "parcels" ? shipments.length : null;
+                  return (
+                    <button key={key} className={"nav-item" + (tab === key ? " active" : "")} onClick={() => setTab(key)}>
+                      <Icon size={16} /> {label}
+                      {count != null && <span className="badge">{count}</span>}
+                    </button>
+                  );
+                })}
               </nav>
+              <div className="rail-foot">
+                <button onClick={resetSeed}><RotateCcw size={13} /> Reset to sample</button>
+                <div>Landed cost = purchase + inbound + this piece's share of its parcel (outbound + customs), by value.</div>
+              </div>
+            </aside>
 
-              {/* Panels */}
-              <div style={{ marginTop: 22 }}>
-                {tab === "overview" && <Overview collections={collections} maxColMagnitude={maxColMagnitude} enriched={enriched} />}
-                {tab === "inventory" && <Inventory enriched={enriched} onRemove={removeItem} />}
-                {tab === "collections" && <Collections collections={collections} enriched={enriched} />}
-                {tab === "shipments" && <Shipments shipments={shipments} enriched={enriched} onRemove={removeShipment} />}
+            {/* Workspace */}
+            <main className="workspace">
+              <div className="toolbar">
+                <div>
+                  <h2>{meta.title}</h2>
+                  <div className="sub">{meta.sub}</div>
+                </div>
+                {tab === "stock" && (
+                  <>
+                    <div className="search">
+                      <Search size={15} color="#9aa4b0" />
+                      <input placeholder="Search SKU, piece, collection…" value={query} onChange={(e) => setQuery(e.target.value)} />
+                    </div>
+                    <select className="filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                      <option value="all">All statuses</option>
+                      {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </>
+                )}
+                <div className="toolbar-actions">
+                  <button className="btn btn-ghost" onClick={() => setModal("shipment")}><Ship size={15} /> Log parcel</button>
+                  <button className="btn btn-primary" onClick={() => setModal("item")}><Plus size={15} /> Add piece</button>
+                </div>
               </div>
 
-              <footer className="flex items-center justify-between" style={{ marginTop: 40, paddingTop: 14, borderTop: `1px solid ${C.line}`, color: C.slate, fontSize: 12 }}>
-                <span>Landed cost = purchase + inbound shipping + this piece's share of its parcel (outbound + customs), apportioned by value.</span>
-                <button onClick={resetSeed} className="flex items-center gap-1" style={{ color: C.slate, background: "none", fontSize: 12 }}>
-                  <RotateCcw size={13} /> Reset to sample
-                </button>
-              </footer>
-            </div>
+              <div className="metrics">
+                <Metric k="On hand" v={kpi.inStock} />
+                <Metric k="Stock value" v={money(kpi.stockValue)} />
+                <Metric k="Sold" v={kpi.soldCount} />
+                <Metric k="Revenue" v={money(kpi.revenue)} />
+                <Metric k="Profit" v={money(kpi.profit)} tone="positive" />
+                <Metric k="Avg margin" v={pct(kpi.avgMargin)} tone="positive" />
+              </div>
+
+              <div className="content">
+                {tab === "stock" && <StockLedger rows={ledgerRows} query={query} setQuery={setQuery} onRemove={removeItem} />}
+                {tab === "overview" && <Overview collections={collections} maxColMagnitude={maxColMagnitude} enriched={enriched} />}
+                {tab === "collections" && <Collections collections={collections} enriched={enriched} />}
+                {tab === "parcels" && <Parcels shipments={shipments} enriched={enriched} onRemove={removeShipment} />}
+              </div>
+            </main>
 
             {modal === "item" && <ItemForm onClose={() => setModal(null)} onSave={(it) => { setItems((xs) => [it, ...xs]); setModal(null); }} shipments={shipments} existing={items} />}
             {modal === "shipment" && <ShipmentForm onClose={() => setModal(null)} onSave={(s) => { setShipments((xs) => [s, ...xs]); setModal(null); }} existing={shipments} />}
@@ -641,11 +733,7 @@
         );
       }
 
-      createRoot(document.getElementById("root")).render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      );
+      createRoot(document.getElementById("root")).render(<App />);
     </script>
   </body>
 </html>
