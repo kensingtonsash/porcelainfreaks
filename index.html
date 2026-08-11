@@ -153,14 +153,14 @@
       // DB (snake_case) <-> app (camelCase)
       const itemFromRow = (r) => ({
         id: r.id, product: r.product, collection: r.collection, brand: r.brand, source: r.source,
-        purchase: Number(r.purchase) || 0, inbound: Number(r.inbound) || 0, status: r.status,
+        purchase: Number(r.purchase) || 0, inbound: Number(r.inbound) || 0, status: r.status, location: r.location || "London",
         listPrice: r.list_price == null ? null : Number(r.list_price),
         salePrice: r.sale_price == null ? null : Number(r.sale_price),
         saleDate: r.sale_date || null, channel: r.channel, shipment: r.shipment,
       });
       const itemToRow = (it) => ({
         id: it.id, product: it.product, collection: it.collection, brand: it.brand, source: it.source,
-        purchase: it.purchase, inbound: it.inbound, status: it.status,
+        purchase: it.purchase, inbound: it.inbound, status: it.status, location: it.location,
         list_price: it.listPrice, sale_price: it.salePrice, sale_date: it.saleDate,
         channel: it.channel, shipment: it.shipment,
       });
@@ -169,13 +169,19 @@
       /* ======================================================================
          Status vocabulary + chip styling
       ====================================================================== */
-      const STATUSES = ["sourced", "in transit", "with rep", "listed", "sold"];
+      const STATUSES = ["sourced", "listed", "sold"];
       const STATUS_STYLE = {
-        sourced:      { bg: "#eef1f4", fg: "#67727f" },
-        "in transit": { bg: "#f6ecd8", fg: "#9a6a20" },
-        "with rep":   { bg: "#e9f1f9", fg: "#2f6fb0" },
-        listed:       { bg: "#e2edfa", fg: "#245a92" },
-        sold:         { bg: "#e3f0e9", fg: "#2f7d5f" },
+        sourced: { bg: "#eef1f4", fg: "#67727f" },
+        listed:  { bg: "#e2edfa", fg: "#245a92" },
+        sold:    { bg: "#e3f0e9", fg: "#2f7d5f" },
+      };
+
+      // Where a piece physically is — separate from its sales status.
+      const LOCATIONS = ["London", "In transit", "Moscow"];
+      const LOCATION_STYLE = {
+        "London":     { bg: "#eef1f4", fg: "#67727f" },
+        "In transit": { bg: "#f6ecd8", fg: "#9a6a20" },
+        "Moscow":     { bg: "#e9f1f9", fg: "#2f6fb0" },
       };
 
       /* ======================================================================
@@ -198,7 +204,7 @@
             const parcelCost = (s.outbound || 0) + (s.customs || 0);
             const share = shipTotals[it.shipment] ? it.purchase / shipTotals[it.shipment] : 0;
             apportioned = parcelCost * share;
-          } else if (it.status !== "sourced") { estimated = true; }
+          } else if (it.location !== "London") { estimated = true; }
           const landed = it.purchase + (it.inbound || 0) + apportioned;
           const sold = it.status === "sold" && it.salePrice != null;
           const profit = sold ? it.salePrice - landed : null;
@@ -246,6 +252,7 @@
          Small building blocks
       ====================================================================== */
       const Chip = ({ status }) => { const st = STATUS_STYLE[status] || STATUS_STYLE.sourced; return <span className="chip" style={{ background: st.bg, color: st.fg }}>{status}</span>; };
+      const LocChip = ({ loc }) => { const st = LOCATION_STYLE[loc] || LOCATION_STYLE["London"]; return <span className="chip" style={{ background: st.bg, color: st.fg }}>{loc || "London"}</span>; };
       function Metric({ k, v, tone }) { return (<div className="metric"><div className="k">{k}</div><div className="v mono" style={{ color: tone === "positive" ? "var(--positive)" : "var(--ink)" }}>{v}</div></div>); }
       function MiniStat({ k, v, tone }) {
         const color = tone === "positive" ? "var(--positive)" : tone === "accent" ? "var(--accent)" : "var(--ink)";
@@ -263,7 +270,7 @@
           <div className="panel">
             <div style={{ overflowX: "auto" }}>
               <table className="ledger">
-                <thead><tr><th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th><th className="r">Landed</th><th className="r">List</th><th className="r">Sold</th><th className="r">Margin</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th>SKU</th><th>Piece</th><th>Collection</th><th>Source</th><th className="r">Purchase price</th><th className="r">List</th><th className="r">Sold</th><th className="r">Margin</th><th>Location</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   {rows.map((it) => (
                     <tr key={it.id}>
@@ -271,10 +278,11 @@
                       <td style={{ fontWeight: 550 }}>{it.product}</td>
                       <td style={{ color: "var(--muted)" }}>{it.collection}</td>
                       <td style={{ color: "var(--muted)" }}>{it.source}</td>
-                      <td className="r mono">{money(it.landed)}{it.estimated && <span title="parcel costs not yet logged — margin not final" style={{ color: "var(--warn)", marginLeft: 3 }}>*</span>}</td>
+                      <td className="r mono">{money(it.purchase)}</td>
                       <td className="r mono" style={{ color: "var(--muted)" }}>{it.listPrice ? money(it.listPrice) : "—"}</td>
                       <td className="r mono">{it.salePrice ? money(it.salePrice) : "—"}</td>
                       <td className="r mono" style={{ fontWeight: 600, color: it.margin != null ? "var(--positive)" : "var(--muted)" }}>{pct(it.margin)}</td>
+                      <td><LocChip loc={it.location} /></td>
                       <td><Chip status={it.status} /></td>
                       <td><button className="rm" title="Remove piece" onClick={() => onRemove(it.id)}><Trash2 size={15} /></button></td>
                     </tr>
@@ -282,13 +290,12 @@
                 </tbody>
               </table>
             </div>
-            <div style={{ padding: "11px 16px", borderTop: "1px solid var(--line-soft)", fontSize: 11.5, color: "var(--muted)" }}><span style={{ color: "var(--warn)" }}>*</span> estimate — the piece will travel but its parcel costs aren't logged yet, so its margin isn't settled.</div>
           </div>
         );
       }
 
       function Overview({ collections, maxColMagnitude, enriched }) {
-        const pipeline = STATUSES.map((s) => ({ s, n: enriched.filter((i) => i.status === s).length }));
+        const pipeline = LOCATIONS.map((s) => ({ s, n: enriched.filter((i) => (i.location || "London") === s).length }));
         const maxPipe = Math.max(1, ...pipeline.map((p) => p.n));
         return (
           <div className="grid2">
@@ -307,12 +314,12 @@
               </div>
             </div>
             <div className="panel">
-              <div className="panel-head"><h3>Where the stock is</h3><p>Pieces by stage of the journey.</p></div>
+              <div className="panel-head"><h3>Where the stock is</h3><p>Pieces by where they physically are.</p></div>
               <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {pipeline.map(({ s, n }) => (
                   <div key={s} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ width: 84, fontSize: 12.5, color: "var(--muted)", textTransform: "capitalize" }}>{s}</span>
-                    <div style={{ flex: 1, height: 24, background: "var(--canvas)", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${(n / maxPipe) * 100}%`, minWidth: n ? 24 : 0, background: STATUS_STYLE[s].bg, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 9 }}><span className="mono" style={{ fontSize: 12, fontWeight: 600, color: STATUS_STYLE[s].fg }}>{n || ""}</span></div></div>
+                    <span style={{ width: 84, fontSize: 12.5, color: "var(--muted)" }}>{s}</span>
+                    <div style={{ flex: 1, height: 24, background: "var(--canvas)", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${(n / maxPipe) * 100}%`, minWidth: n ? 24 : 0, background: LOCATION_STYLE[s].bg, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 9 }}><span className="mono" style={{ fontSize: 12, fontWeight: 600, color: LOCATION_STYLE[s].fg }}>{n || ""}</span></div></div>
                   </div>
                 ))}
               </div>
@@ -458,14 +465,14 @@
       const Sel = ({ label, value, onChange, options, optionLabels = {} }) => (<label className="field"><span>{label}</span><select value={value} onChange={onChange}>{options.map((o) => <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>)}</select></label>);
 
       function ItemForm({ onClose, onSave, shipments, collections, existing }) {
-        const [f, setF] = useState({ id: "", product: "", collection: collections[0]?.name || "", brand: collections[0]?.brand || "Villeroy & Boch", source: "eBay UK", purchase: "", inbound: "", status: "sourced", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
+        const [f, setF] = useState({ id: "", product: "", collection: collections[0]?.name || "", brand: collections[0]?.brand || "Villeroy & Boch", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
         const doSave = () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
           if (existing.some((x) => x.id === id)) { alert("That SKU already exists — give it a unique one."); return; }
           const isSold = f.status === "sold" && f.salePrice;
           const saleDate = f.saleDate || (isSold ? new Date().toISOString().slice(0, 10) : null);
-          onSave({ id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand, source: f.source, purchase: +f.purchase || 0, inbound: +f.inbound || 0, status: f.status, listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null, saleDate, channel: f.channel || null, shipment: f.shipment || null });
+          onSave({ id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand, source: f.source, purchase: +f.purchase || 0, inbound: 0, status: f.status, location: f.location, listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null, saleDate, channel: f.channel || null, shipment: f.shipment || null });
         };
         return (
           <Modal title="Add a piece" onClose={onClose} onSave={doSave}>
@@ -474,11 +481,11 @@
               <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
               <F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} />
             </div>
-            <div className="frow"><Sel label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" value={f.purchase} onChange={set("purchase")} /></div>
-            <div className="frow"><F label="Inbound shipping (£)" type="number" value={f.inbound} onChange={set("inbound")} /><Sel label="Status" value={f.status} onChange={set("status")} options={STATUSES} /></div>
+            <div className="frow"><Sel label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" placeholder="total paid, inc. delivery" value={f.purchase} onChange={set("purchase")} /></div>
+            <div className="frow"><Sel label="Status" value={f.status} onChange={set("status")} options={STATUSES} /><Sel label="Location" value={f.location} onChange={set("location")} options={LOCATIONS} /></div>
+            <label className="field"><span>Parcel</span><select value={f.shipment} onChange={set("shipment")}><option value="">— none yet —</option>{shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}</select></label>
             <div className="frow"><F label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} /><F label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} /></div>
             <div className="frow"><F label="Sale date" type="date" value={f.saleDate} onChange={set("saleDate")} /><F label="Sale channel" placeholder="Avito" value={f.channel} onChange={set("channel")} /></div>
-            <label className="field"><span>Parcel</span><select value={f.shipment} onChange={set("shipment")}><option value="">— none yet —</option>{shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}</select></label>
           </Modal>
         );
       }
@@ -566,7 +573,7 @@
           return enriched.filter((it) => {
             if (statusFilter !== "all" && it.status !== statusFilter) return false;
             if (!q) return true;
-            return [it.id, it.product, it.collection, it.source, it.brand].filter(Boolean).some((v) => v.toLowerCase().includes(q));
+            return [it.id, it.product, it.collection, it.source, it.brand, it.location].filter(Boolean).some((v) => v.toLowerCase().includes(q));
           });
         }, [enriched, query, statusFilter]);
 
@@ -605,7 +612,7 @@
               </nav>
               <div className="rail-foot">
                 <div className="sync"><span className={"dot" + (online ? "" : " off")} />{online ? "Synced to Supabase" : "Offline — retrying"}</div>
-                <div>Landed cost = purchase + inbound + this piece's share of its parcel (outbound + customs), by value.</div>
+                <div>Landed cost = purchase (inc. delivery) + this piece's share of its parcel (outbound + customs), by value.</div>
                 <button onClick={onLogout} style={{ marginTop: 11, color: "var(--rail-text)", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><LogOut size={13} /> Sign out</button>
               </div>
             </aside>
