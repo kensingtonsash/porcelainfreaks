@@ -115,6 +115,25 @@
         .toolbar { flex-wrap: wrap; }
         .search { max-width: none; order: 3; flex-basis: 100%; }
       }
+
+      /* Mobile stock cards */
+      .scards { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+      .scard { border: 1px solid var(--line); border-radius: 11px; padding: 12px; background: var(--surface); }
+      .sfig { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px 8px; margin-top: 12px; }
+      .sfig .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+      .sfig .v { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+      @media (max-width: 720px) {
+        .metrics { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 14px; gap: 12px 10px; }
+        .metric { margin: 0; padding: 0; border-right: none; }
+        .metric .v { font-size: 17px; }
+        .content { padding: 14px 12px 40px; }
+        .toolbar { padding: 13px 14px; gap: 10px; }
+        .toolbar h2 { font-size: 16px; }
+        .frow { grid-template-columns: 1fr; }
+        .panel-body { padding: 14px; }
+        .btn { padding: 9px 13px; }
+      }
     </style>
 
     <script type="importmap">
@@ -332,9 +351,49 @@
       /* ======================================================================
          Views
       ====================================================================== */
+      function useIsMobile(bp = 720) {
+        const [m, setM] = useState(() => typeof window !== "undefined" && window.matchMedia(`(max-width:${bp}px)`).matches);
+        useEffect(() => {
+          const mq = window.matchMedia(`(max-width:${bp}px)`);
+          const on = () => setM(mq.matches);
+          mq.addEventListener("change", on);
+          return () => mq.removeEventListener("change", on);
+        }, [bp]);
+        return m;
+      }
+
       function StockLedger({ rows, query, setQuery, onRemove, onSetImage, onZoom }) {
+        const isMobile = useIsMobile(720);
         if (!rows.length) return (
           <div className="panel"><div className="empty"><b>No pieces match</b>{query ? "Nothing here for that search — clear it to see the full register." : "Add your first piece to start the register."}{query && <div style={{ marginTop: 12 }}><button className="btn btn-ghost" onClick={() => setQuery("")}>Clear search</button></div>}</div></div>
+        );
+        if (isMobile) return (
+          <div className="panel" style={{ padding: 0 }}>
+            <div className="scards">
+              {rows.map((it) => (
+                <div className="scard" key={it.id}>
+                  <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                    <Thumb item={it} onSetImage={onSetImage} onZoom={onZoom} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.25 }}>{it.product}</div>
+                      <div className="mono" style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 2 }}>{it.id}</div>
+                      <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>{it.collection}</div>
+                    </div>
+                    <button className="rm" onClick={() => onRemove(it.id)} title="Remove piece"><Trash2 size={15} /></button>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, marginTop: 10 }}><LocChip loc={it.location} /><Chip status={it.status} /></div>
+                  <div className="sfig">
+                    <div><div className="k">Purchase</div><div className="v mono">{money(it.purchase)}</div></div>
+                    <div><div className="k">Export</div><div className="v mono">{it.apportioned ? money(it.apportioned) : "—"}</div></div>
+                    <div><div className="k">List</div><div className="v mono">{it.listPrice ? money(it.listPrice) : "—"}</div></div>
+                    <div><div className="k">Sold</div><div className="v mono">{it.salePrice ? money(it.salePrice) : "—"}</div></div>
+                    <div><div className="k">Margin</div><div className="v mono" style={{ color: it.margin != null ? "var(--positive)" : "var(--muted)" }}>{pct(it.margin)}</div></div>
+                    <div><div className="k">Source</div><div className="v" style={{ fontSize: 12.5, fontWeight: 500 }}>{it.source || "—"}</div></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         );
         return (
           <div className="panel">
@@ -415,7 +474,7 @@
                 <div><div style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)", fontWeight: 600 }}>Revenue</div><div className="mono" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", margin: "4px 0 7px" }}>{money(data.revenue)}</div>{prev && <Delta now={data.revenue} prev={prev.revenue} />}</div>
                 <div><div style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)", fontWeight: 600 }}>Profit</div><div className="mono" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", margin: "4px 0 7px", color: "var(--positive)" }}>{money(data.profit)}</div>{prev && <Delta now={data.profit} prev={prev.profit} />}</div>
               </div>
-              <div style={{ display: "flex", gap: 22, marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--line-soft)" }}><MiniStat k="Units sold" v={data.count} /><MiniStat k="Avg margin" v={pct(avgMargin)} tone="positive" /></div>
+              <div style={{ display: "flex", gap: 22, marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--line-soft)", flexWrap: "wrap", rowGap: 12 }}><MiniStat k="Units sold" v={data.count} /><MiniStat k="Avg margin" v={pct(avgMargin)} tone="positive" /></div>
             </div>
           </div>
         );
@@ -460,17 +519,22 @@
         );
       }
 
-      function Collections({ collections, enriched, onAddCollection }) {
+      function Collections({ collections, enriched, onAddCollection, onRemoveCollection }) {
         const [name, setName] = useState("");
-        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n); setName(""); };
+        const [brand, setBrand] = useState("Villeroy & Boch");
+        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n, brand); setName(""); };
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="panel">
-              <div className="panel-body" style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <div className="search" style={{ maxWidth: 360 }}>
+              <div className="panel-body" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <div className="search" style={{ maxWidth: 320 }}>
                   <Archive size={15} color="#9aa4b0" />
-                  <input placeholder="New collection name, e.g. V&B Benedikt Circus" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
+                  <input placeholder="New collection, e.g. V&B Benedikt Circus" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
                 </div>
+                <input className="filter" list="pf-brands" placeholder="Brand" value={brand} onChange={(e) => setBrand(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} style={{ width: 180 }} />
+                <datalist id="pf-brands">
+                  <option value="Villeroy & Boch" /><option value="Royal Doulton" /><option value="Christofle" /><option value="Royal Copenhagen" /><option value="Lladró" /><option value="Wedgwood" />
+                </datalist>
                 <button className="btn btn-primary" onClick={add}><Plus size={15} /> Add collection</button>
                 <span style={{ fontSize: 12, color: "var(--muted)" }}>Saved to Supabase — appears everywhere instantly.</span>
               </div>
@@ -480,9 +544,12 @@
                 const pieces = enriched.filter((i) => (i.collection || "Unassigned") === c.name);
                 return (
                   <div key={c.name} className="panel">
-                    <div className="panel-head"><h3>{c.name}</h3><p>{c.brand}</p></div>
+                    <div className="panel-head" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                      <div><h3>{c.name}</h3><p>{c.brand}</p></div>
+                      {!pieces.length && <button className="rm" title="Delete collection" onClick={() => onRemoveCollection(c.name)}><Trash2 size={14} /></button>}
+                    </div>
                     <div className="panel-body">
-                      <div style={{ display: "flex", gap: 22, marginBottom: 14 }}><MiniStat k="On hand" v={c.inStock} /><MiniStat k="Sold" v={c.sold} /><MiniStat k="Profit" v={money(c.profit)} tone="positive" /><MiniStat k="Held value" v={money(c.stockValue)} /></div>
+                      <div style={{ display: "flex", gap: 22, marginBottom: 14, flexWrap: "wrap", rowGap: 14 }}><MiniStat k="On hand" v={c.inStock} /><MiniStat k="Sold" v={c.sold} /><MiniStat k="Profit" v={money(c.profit)} tone="positive" /><MiniStat k="Held value" v={money(c.stockValue)} /></div>
                       <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
                         {pieces.map((p) => (<div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}><span>{p.product}</span><span style={{ color: STATUS_STYLE[p.status].fg, fontWeight: 600, fontSize: 11.5 }}>{p.status}</span></div>))}
                         {!pieces.length && <div style={{ fontSize: 12.5, color: "var(--muted)" }}>No pieces yet — nothing sourced in this series.</div>}
@@ -505,7 +572,7 @@
                 <div key={s.id} className="panel">
                   <div className="panel-head" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}><div><h3 className="mono">{s.id}</h3><p>{s.note}</p></div><span style={{ fontSize: 11.5, color: "var(--muted)" }}>Sent {s.date}</span></div>
                   <div className="panel-body">
-                    <div style={{ display: "flex", gap: 22, marginBottom: 14 }}><MiniStat k="Outbound" v={money(s.outbound)} /><MiniStat k="Customs" v={money(s.customs)} /><MiniStat k="Parcel total" v={money(parcelCost)} tone="accent" /><MiniStat k="Pieces" v={pieces.length} /></div>
+                    <div style={{ display: "flex", gap: 22, marginBottom: 14, flexWrap: "wrap", rowGap: 14 }}><MiniStat k="Outbound" v={money(s.outbound)} /><MiniStat k="Customs" v={money(s.customs)} /><MiniStat k="Parcel total" v={money(parcelCost)} tone="accent" /><MiniStat k="Pieces" v={pieces.length} /></div>
                     <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 10 }}>
                       {pieces.map((p) => (<div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5, padding: "4px 0" }}><span>{p.product}</span><span className="mono" style={{ color: "var(--muted)" }}>+{money(p.apportioned)} share</span></div>))}
                       {!pieces.length && <div style={{ fontSize: 12, color: "var(--muted)" }}>No pieces assigned to this parcel yet.</div>}
@@ -673,11 +740,20 @@
           const { error } = await sb.from("pf_shipments").delete().eq("id", id);
           if (error) { alert("Remove failed: " + error.message); loadAll(); }
         };
-        const addCollection = async (name) => {
+        const addCollection = async (name, brand) => {
           if (collections.some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert("That collection already exists."); return; }
-          setCollections((xs) => [...xs, { name, brand: "Villeroy & Boch" }]);
-          const { error } = await sb.from("pf_collections").insert({ name, brand: "Villeroy & Boch", sort: collections.length + 1 });
+          const b = (brand || "").trim() || "Villeroy & Boch";
+          setCollections((xs) => [...xs, { name, brand: b }]);
+          const { error } = await sb.from("pf_collections").insert({ name, brand: b, sort: collections.length + 1 });
           if (error) { alert("Save failed: " + error.message); loadAll(); }
+        };
+        const removeCollection = async (name) => {
+          const used = items.some((i) => i.collection === name);
+          if (used) { alert("This collection still has pieces in it — move or remove those first."); return; }
+          if (!confirm(`Delete the collection “${name}”?`)) return;
+          setCollections((xs) => xs.filter((c) => c.name !== name));
+          const { error } = await sb.from("pf_collections").delete().eq("name", name);
+          if (error) { alert("Delete failed: " + error.message); loadAll(); }
         };
 
         const meta = VIEW_META[tab];
@@ -729,7 +805,7 @@
                   {tab === "stock" && <StockLedger rows={ledgerRows} query={query} setQuery={setQuery} onRemove={removeItem} onSetImage={setItemImage} onZoom={setZoom} />}
                   {tab === "overview" && <Overview collections={collectionRollup} maxColMagnitude={maxColMagnitude} enriched={enriched} />}
                   {tab === "financials" && <Financials enriched={enriched} />}
-                  {tab === "collections" && <Collections collections={collectionRollup} enriched={enriched} onAddCollection={addCollection} />}
+                  {tab === "collections" && <Collections collections={collectionRollup} enriched={enriched} onAddCollection={addCollection} onRemoveCollection={removeCollection} />}
                   {tab === "parcels" && <Parcels shipments={shipments} enriched={enriched} onRemove={removeShipment} />}
                 </>)}
               </div>
