@@ -641,13 +641,14 @@
       const Sel = ({ label, value, onChange, options, optionLabels = {} }) => (<label className="field"><span>{label}</span><select value={value} onChange={onChange}>{options.map((o) => <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>)}</select></label>);
 
       function ItemForm({ onClose, onSave, shipments, collections, existing }) {
-        const [f, setF] = useState({ id: "", product: "", collection: collections[0]?.name || "", brand: collections[0]?.brand || "Villeroy & Boch", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
+        const [f, setF] = useState({ id: "", product: "", collection: "", brand: "", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
         const [photo, setPhoto] = useState(null);
         const [busy, setBusy] = useState(false);
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
         const doSave = async () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
           if (existing.some((x) => x.id === id)) { alert("That SKU already exists — give it a unique one."); return; }
+          if (!f.collection) { alert("Choose a collection for this piece."); return; }
           const isSold = f.status === "sold" && f.salePrice;
           const saleDate = f.saleDate || (isSold ? new Date().toISOString().slice(0, 10) : null);
           let imageUrl = null;
@@ -664,7 +665,7 @@
               </div>
             </label>
             <div className="frow">
-              <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
+              <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}><option value="">— Choose collection —</option>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
               <F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} />
             </div>
             <div className="frow"><Sel label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" placeholder="total paid, inc. delivery" value={f.purchase} onChange={set("purchase")} /></div>
