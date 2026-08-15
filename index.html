@@ -123,6 +123,10 @@
       .sfig .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
       .sfig .v { font-size: 14px; font-weight: 600; margin-top: 2px; }
 
+      .add-coll { display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: end; }
+      .add-coll .field { margin: 0; }
+      @media (max-width: 720px) { .add-coll { grid-template-columns: 1fr; } .add-coll .btn { width: 100%; justify-content: center; } }
+
       @media (max-width: 720px) {
         .metrics { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 14px; gap: 12px 10px; }
         .metric { margin: 0; padding: 0; border-right: none; }
@@ -547,18 +551,23 @@
 
       function Collections({ collections, enriched, onAddCollection, onRemoveCollection, onSetBrand }) {
         const [name, setName] = useState("");
-        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n); setName(""); };
-        const brandOptions = (current) => Array.from(new Set([...BRANDS, current].filter(Boolean)));
+        const [brand, setBrand] = useState("Villeroy & Boch");
+        const [brandTouched, setBrandTouched] = useState(false);
+        const onName = (v) => { setName(v); if (!brandTouched) setBrand(guessBrand(v)); };
+        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n, brand); setName(""); setBrand("Villeroy & Boch"); setBrandTouched(false); };
+        const allBrands = Array.from(new Set([...BRANDS, ...collections.map((c) => c.brand)].filter(Boolean)));
+        const brandOptions = (current) => Array.from(new Set([...allBrands, current].filter(Boolean)));
+        const chooseBrand = (value, apply) => { if (value === "__add__") { const nb = (prompt("New brand name") || "").trim(); if (nb) apply(nb); return; } apply(value); };
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="panel">
-              <div className="panel-body" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <div className="search" style={{ flex: 1, minWidth: 220 }}>
-                  <Archive size={15} color="#9aa4b0" />
-                  <input placeholder="New collection, e.g. V&B Benedikt Circus" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
+              <div className="panel-body">
+                <div className="add-coll">
+                  <label className="field"><span>Collection name</span><input placeholder="e.g. V&B Benedikt Circus" value={name} onChange={(e) => onName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} /></label>
+                  <label className="field"><span>Brand</span><select value={brand} onChange={(e) => chooseBrand(e.target.value, (b) => { setBrand(b); setBrandTouched(true); })}>{brandOptions(brand).map((b) => <option key={b} value={b}>{b}</option>)}<option value="__add__">＋ Add new brand…</option></select></label>
+                  <button className="btn btn-primary" onClick={add}><Plus size={15} /> Add</button>
                 </div>
-                <button className="btn btn-primary" onClick={add}><Plus size={15} /> Add collection</button>
-                <span style={{ fontSize: 12, color: "var(--muted)" }}>Brand is guessed from the name — fix it on the card if needed.</span>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>Brand auto-fills from the name — change it here if the guess is off.</div>
               </div>
             </div>
             <div className="grid-cards">
@@ -569,8 +578,9 @@
                     <div className="panel-head" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
                       <div style={{ minWidth: 0 }}>
                         <h3>{c.name}</h3>
-                        <select value={c.brand || ""} onChange={(e) => onSetBrand(c.name, e.target.value)} title="Brand" style={{ marginTop: 6, fontSize: 12, fontWeight: 500, color: "var(--muted)", border: "1px solid var(--line)", borderRadius: 6, padding: "4px 8px", background: "var(--surface)", maxWidth: "100%" }}>
+                        <select value={c.brand || ""} onChange={(e) => chooseBrand(e.target.value, (b) => onSetBrand(c.name, b))} title="Brand" style={{ marginTop: 6, fontSize: 12, fontWeight: 500, color: "var(--muted)", border: "1px solid var(--line)", borderRadius: 6, padding: "4px 8px", background: "var(--surface)", maxWidth: "100%" }}>
                           {brandOptions(c.brand).map((b) => <option key={b} value={b}>{b}</option>)}
+                          <option value="__add__">＋ Add new brand…</option>
                         </select>
                       </div>
                       {!pieces.length && <button className="rm" title="Delete collection" onClick={() => onRemoveCollection(c.name)}><Trash2 size={14} /></button>}
@@ -767,9 +777,9 @@
           const { error } = await sb.from("pf_shipments").delete().eq("id", id);
           if (error) { alert("Remove failed: " + error.message); loadAll(); }
         };
-        const addCollection = async (name) => {
+        const addCollection = async (name, brand) => {
           if (collections.some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert("That collection already exists."); return; }
-          const b = guessBrand(name);
+          const b = (brand || "").trim() || guessBrand(name);
           setCollections((xs) => [...xs, { name, brand: b }]);
           const { error } = await sb.from("pf_collections").insert({ name, brand: b, sort: collections.length + 1 });
           if (error) { alert("Save failed: " + error.message); loadAll(); }
