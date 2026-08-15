@@ -641,7 +641,7 @@
       const Sel = ({ label, value, onChange, options, optionLabels = {} }) => (<label className="field"><span>{label}</span><select value={value} onChange={onChange}>{options.map((o) => <option key={o} value={o}>{optionLabels[o] ?? (o || "—")}</option>)}</select></label>);
 
       function ItemForm({ onClose, onSave, shipments, collections, existing }) {
-        const [f, setF] = useState({ id: "", product: "", collection: "", brand: "", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "" });
+        const [f, setF] = useState({ id: "", product: "", collection: "", brand: "", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "", imageUrl: null });
         const [photo, setPhoto] = useState(null);
         const [busy, setBusy] = useState(false);
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -652,7 +652,8 @@
           const seen = new Map();
           existing.forEach((it) => {
             const key = `${it.product}||${it.collection}`;
-            if (!seen.has(key)) seen.set(key, { key, product: it.product, collection: it.collection, brand: it.brand, sku: it.id });
+            if (!seen.has(key)) seen.set(key, { key, product: it.product, collection: it.collection, brand: it.brand, sku: it.id, imageUrl: it.imageUrl || null });
+            else { const e = seen.get(key); if (!e.imageUrl && it.imageUrl) e.imageUrl = it.imageUrl; }
           });
           return Array.from(seen.values()).sort((a, b) => a.product.localeCompare(b.product));
         })();
@@ -667,7 +668,7 @@
         const onReorder = (key) => {
           const c = catalogue.find((x) => x.key === key);
           if (!c) return;
-          setF((prev) => ({ ...prev, product: c.product, collection: c.collection, brand: c.brand, id: suggestSku(c.sku) }));
+          setF((prev) => ({ ...prev, product: c.product, collection: c.collection, brand: c.brand, id: suggestSku(c.sku), imageUrl: c.imageUrl || null }));
         };
 
         const doSave = async () => {
@@ -676,7 +677,7 @@
           if (!f.collection) { alert("Choose a collection for this piece."); return; }
           const isSold = f.status === "sold" && f.salePrice;
           const saleDate = f.saleDate || (isSold ? new Date().toISOString().slice(0, 10) : null);
-          let imageUrl = null;
+          let imageUrl = f.imageUrl || null;
           if (photo) { setBusy(true); try { imageUrl = await uploadItemImage(photo, id); } catch (e) { alert("Photo upload failed: " + e.message); } setBusy(false); }
           onSave({ id, product: f.product || "Untitled piece", collection: f.collection || "Unassigned", brand: f.brand, source: f.source, purchase: +f.purchase || 0, inbound: 0, status: f.status, location: f.location, listPrice: f.listPrice ? +f.listPrice : null, salePrice: f.salePrice ? +f.salePrice : null, saleDate, channel: f.channel || null, shipment: f.shipment || null, imageUrl });
         };
@@ -693,8 +694,11 @@
             <div className="frow"><F label="SKU" placeholder="VB-GRN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Greenland teapot" value={f.product} onChange={set("product")} /></div>
             <label className="field"><span>Photo</span>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 5 }}>
-                {photo ? <img src={URL.createObjectURL(photo)} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)" }} /> : <div style={{ width: 48, height: 48, borderRadius: 7, border: "1px dashed #c7cfd8", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}><ImagePlus size={18} /></div>}
-                <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files && e.target.files[0])} style={{ fontSize: 12.5 }} />
+                {photo ? <img src={URL.createObjectURL(photo)} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)" }} /> : f.imageUrl ? <img src={f.imageUrl} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)" }} /> : <div style={{ width: 48, height: 48, borderRadius: 7, border: "1px dashed #c7cfd8", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}><ImagePlus size={18} /></div>}
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                  <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files && e.target.files[0])} style={{ fontSize: 12.5 }} />
+                  {f.imageUrl && !photo && <div style={{ marginTop: 3 }}>Using the existing photo — choose a file to replace it.</div>}
+                </div>
               </div>
             </label>
             <div className="frow">
