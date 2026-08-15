@@ -265,6 +265,17 @@
       const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       const monthLabel = (key) => { const [y, m] = key.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" }); };
 
+      // Work out the brand from the collection name (names carry the brand prefix).
+      function guessBrand(name) {
+        const s = (name || "").toLowerCase();
+        if (s.includes("royal doulton")) return "Royal Doulton";
+        if (s.includes("christofle")) return "Christofle";
+        if (s.includes("royal copenhagen")) return "Royal Copenhagen";
+        if (s.includes("lladro") || s.includes("lladró")) return "Lladró";
+        if (s.includes("wedgwood")) return "Wedgwood";
+        return "Villeroy & Boch";
+      }
+
       function byCollection(enriched, collectionList) {
         const map = {};
         collectionList.forEach((c) => { map[c.name] = { name: c.name, brand: c.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 }; });
@@ -521,22 +532,17 @@
 
       function Collections({ collections, enriched, onAddCollection, onRemoveCollection }) {
         const [name, setName] = useState("");
-        const [brand, setBrand] = useState("Villeroy & Boch");
-        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n, brand); setName(""); };
+        const add = async () => { const n = name.trim(); if (!n) return; await onAddCollection(n); setName(""); };
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="panel">
               <div className="panel-body" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <div className="search" style={{ maxWidth: 320 }}>
+                <div className="search" style={{ flex: 1, minWidth: 220 }}>
                   <Archive size={15} color="#9aa4b0" />
                   <input placeholder="New collection, e.g. V&B Benedikt Circus" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
                 </div>
-                <input className="filter" list="pf-brands" placeholder="Brand" value={brand} onChange={(e) => setBrand(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} style={{ width: 180 }} />
-                <datalist id="pf-brands">
-                  <option value="Villeroy & Boch" /><option value="Royal Doulton" /><option value="Christofle" /><option value="Royal Copenhagen" /><option value="Lladró" /><option value="Wedgwood" />
-                </datalist>
                 <button className="btn btn-primary" onClick={add}><Plus size={15} /> Add collection</button>
-                <span style={{ fontSize: 12, color: "var(--muted)" }}>Saved to Supabase — appears everywhere instantly.</span>
+                <span style={{ fontSize: 12, color: "var(--muted)" }}>Brand is set from the name. Saved instantly.</span>
               </div>
             </div>
             <div className="grid-cards">
@@ -740,9 +746,9 @@
           const { error } = await sb.from("pf_shipments").delete().eq("id", id);
           if (error) { alert("Remove failed: " + error.message); loadAll(); }
         };
-        const addCollection = async (name, brand) => {
+        const addCollection = async (name) => {
           if (collections.some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert("That collection already exists."); return; }
-          const b = (brand || "").trim() || "Villeroy & Boch";
+          const b = guessBrand(name);
           setCollections((xs) => [...xs, { name, brand: b }]);
           const { error } = await sb.from("pf_collections").insert({ name, brand: b, sort: collections.length + 1 });
           if (error) { alert("Save failed: " + error.message); loadAll(); }
