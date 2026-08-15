@@ -645,6 +645,31 @@
         const [photo, setPhoto] = useState(null);
         const [busy, setBusy] = useState(false);
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+
+        // Distinct products already in stock, so a repeat buy can be picked
+        // from a list instead of re-identified. Rebuilds from live stock.
+        const catalogue = (() => {
+          const seen = new Map();
+          existing.forEach((it) => {
+            const key = `${it.product}||${it.collection}`;
+            if (!seen.has(key)) seen.set(key, { key, product: it.product, collection: it.collection, brand: it.brand, sku: it.id });
+          });
+          return Array.from(seen.values()).sort((a, b) => a.product.localeCompare(b.product));
+        })();
+        const suggestSku = (sku) => {
+          const m = String(sku || "").match(/^(.*?)(\d+)$/);
+          if (!m) return "";
+          const prefix = m[1], width = m[2].length;
+          let max = 0;
+          existing.forEach((it) => { const mm = String(it.id).match(/^(.*?)(\d+)$/); if (mm && mm[1] === prefix) max = Math.max(max, parseInt(mm[2], 10)); });
+          return prefix + String(max + 1).padStart(width, "0");
+        };
+        const onReorder = (key) => {
+          const c = catalogue.find((x) => x.key === key);
+          if (!c) return;
+          setF((prev) => ({ ...prev, product: c.product, collection: c.collection, brand: c.brand, id: suggestSku(c.sku) }));
+        };
+
         const doSave = async () => {
           const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
           if (existing.some((x) => x.id === id)) { alert("That SKU already exists — give it a unique one."); return; }
@@ -657,6 +682,14 @@
         };
         return (
           <Modal title="Add a piece" onClose={onClose} onSave={doSave} saveLabel={busy ? "Uploading photo…" : "Save"}>
+            {catalogue.length > 0 && (
+              <label className="field"><span>Reorder an existing piece</span>
+                <select value="" onChange={(e) => e.target.value && onReorder(e.target.value)}>
+                  <option value="">— New piece (fill in below) —</option>
+                  {catalogue.map((c) => <option key={c.key} value={c.key}>{c.product} — {c.collection}</option>)}
+                </select>
+              </label>
+            )}
             <div className="frow"><F label="SKU" placeholder="VB-GRN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Greenland teapot" value={f.product} onChange={set("product")} /></div>
             <label className="field"><span>Photo</span>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 5 }}>
