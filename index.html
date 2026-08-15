@@ -295,6 +295,21 @@
         return "Villeroy & Boch";
       }
 
+      // Build an SKU prefix from a collection name (used only when the
+      // collection has no items yet to copy a prefix from).
+      function skuPrefixFromName(name) {
+        const map = [["royal doulton", "RD"], ["royal copenhagen", "RC"], ["christofle", "CH"], ["lladró", "LL"], ["lladro", "LL"], ["wedgwood", "WW"], ["belleek", "BK"], ["villeroy", "VB"], ["v&b", "VB"]];
+        const lower = (name || "").toLowerCase();
+        let brand = null, rest = name || "";
+        for (const [k, code] of map) { if (lower.includes(k)) { brand = code; rest = (name || "").replace(new RegExp(k, "i"), " "); break; } }
+        const words = rest.replace(/[^a-zA-Z ]+/g, " ").split(/\s+/).filter(Boolean);
+        let series = "GEN";
+        if (words.length === 1) series = words[0].slice(0, 3).toUpperCase();
+        else if (words.length >= 2) series = words.map((w) => w[0]).join("").slice(0, 3).toUpperCase();
+        const bc = brand || (words[0] ? words[0].slice(0, 2).toUpperCase() : "XX");
+        return `${bc}-${series}-`;
+      }
+
       function byCollection(enriched, collectionList) {
         const map = {};
         collectionList.forEach((c) => { map[c.name] = { name: c.name, brand: c.brand, inStock: 0, sold: 0, profit: 0, stockValue: 0 }; });
@@ -644,6 +659,7 @@
         const [f, setF] = useState({ id: "", product: "", collection: "", brand: "", source: "eBay UK", purchase: "", status: "sourced", location: "London", listPrice: "", salePrice: "", saleDate: "", channel: "", shipment: "", imageUrl: null });
         const [photo, setPhoto] = useState(null);
         const [busy, setBusy] = useState(false);
+        const [skuEdited, setSkuEdited] = useState(false);
         const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
         // Distinct products already in stock, so a repeat buy can be picked
@@ -671,8 +687,26 @@
           setF((prev) => ({ ...prev, product: c.product, collection: c.collection, brand: c.brand, id: suggestSku(c.sku), imageUrl: c.imageUrl || null }));
         };
 
+        // Next accurate SKU for a collection: copy the collection's own code
+        // prefix and increment; fall back to a derived prefix for new ones.
+        const nextSkuForCollection = (collection) => {
+          if (!collection) return "";
+          const prefixes = {}; let width = 3;
+          existing.filter((i) => i.collection === collection).forEach((i) => {
+            const m = String(i.id).match(/^(.*?)(\d+)$/);
+            if (m) { prefixes[m[1]] = (prefixes[m[1]] || 0) + 1; width = m[2].length; }
+          });
+          const prefix = Object.keys(prefixes).length
+            ? Object.entries(prefixes).sort((a, b) => b[1] - a[1])[0][0]
+            : skuPrefixFromName(collection);
+          let max = 0;
+          existing.forEach((i) => { const m = String(i.id).match(/^(.*?)(\d+)$/); if (m && m[1] === prefix) max = Math.max(max, parseInt(m[2], 10)); });
+          return prefix + String(max + 1).padStart(width, "0");
+        };
+
         const doSave = async () => {
-          const id = f.id.trim() || `ITEM-${Date.now().toString().slice(-5)}`;
+          const id = f.id.trim() || nextSkuForCollection(f.collection);
+          if (!id) { alert("Choose a collection so a SKU can be generated, or type one in."); return; }
           if (existing.some((x) => x.id === id)) { alert("That SKU already exists — give it a unique one."); return; }
           if (!f.collection) { alert("Choose a collection for this piece."); return; }
           const isSold = f.status === "sold" && f.salePrice;
@@ -691,7 +725,7 @@
                 </select>
               </label>
             )}
-            <div className="frow"><F label="SKU" placeholder="VB-GRN-004 (auto if blank)" value={f.id} onChange={set("id")} /><F label="Product / model" placeholder="Greenland teapot" value={f.product} onChange={set("product")} /></div>
+            <div className="frow"><F label="SKU" placeholder="auto from collection" value={f.id} onChange={(e) => { setSkuEdited(true); const v = e.target.value; setF((p) => ({ ...p, id: v })); }} /><F label="Product / model" placeholder="Greenland teapot" value={f.product} onChange={set("product")} /></div>
             <label className="field"><span>Photo</span>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 5 }}>
                 {photo ? <img src={URL.createObjectURL(photo)} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)" }} /> : f.imageUrl ? <img src={f.imageUrl} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 7, border: "1px solid var(--line)" }} /> : <div style={{ width: 48, height: 48, borderRadius: 7, border: "1px dashed #c7cfd8", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}><ImagePlus size={18} /></div>}
@@ -702,7 +736,7 @@
               </div>
             </label>
             <div className="frow">
-              <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF({ ...f, collection: name, brand: c ? c.brand : f.brand }); }}><option value="">— Choose collection —</option>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
+              <label className="field"><span>Collection</span><select value={f.collection} onChange={(e) => { const name = e.target.value; const c = collections.find((x) => x.name === name); setF((p) => ({ ...p, collection: name, brand: c ? c.brand : p.brand, id: skuEdited ? p.id : (name ? nextSkuForCollection(name) : "") })); }}><option value="">— Choose collection —</option>{collections.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}</select></label>
               <F label="Brand" placeholder="Villeroy & Boch" value={f.brand} onChange={set("brand")} />
             </div>
             <div className="frow"><Sel label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" placeholder="total paid, inc. delivery" value={f.purchase} onChange={set("purchase")} /></div>
