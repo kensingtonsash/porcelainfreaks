@@ -19,7 +19,7 @@
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body, #root { height: 100%; }
-      body { font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; background: var(--canvas); color: var(--ink); -webkit-font-smoothing: antialiased; font-size: 14px; }
+      body { font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; background: var(--canvas); color: var(--ink); -webkit-font-smoothing: antialiased; font-size: 14px; -webkit-text-size-adjust: 100%; }
       button { cursor: pointer; border: none; font-family: inherit; background: none; color: inherit; }
       input, select { font-family: inherit; outline: none; color: var(--ink); }
       input::placeholder { color: #9aa4b0; }
@@ -133,6 +133,19 @@
         .frow { grid-template-columns: 1fr; }
         .panel-body { padding: 14px; }
         .btn { padding: 9px 13px; }
+
+        /* 16px inputs stop iOS Safari auto-zooming (and panning) on focus */
+        input, select, textarea,
+        .field input, .field select, .search input, .filter { font-size: 16px; }
+
+        /* Add/Log forms become a full-height sheet: header on top, body
+           scrolls, Save pinned at the bottom above the home bar. */
+        .scrim { padding: 0; align-items: stretch; }
+        .modal { max-width: none; width: 100%; height: 100vh; height: 100dvh; max-height: none; border-radius: 0; display: flex; flex-direction: column; }
+        .modal-head { flex-shrink: 0; }
+        .modal-body { max-height: none; flex: 1; overscroll-behavior: contain; }
+        .modal-foot { flex-shrink: 0; position: sticky; bottom: 0; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+        .modal-foot .btn { flex: 1; justify-content: center; }
       }
     </style>
 
