@@ -708,8 +708,12 @@
             <div className="frow"><Sel label="Source" value={f.source} onChange={set("source")} options={["eBay UK", "Vinted", "Subito.it", "Leboncoin", "Other"]} /><F label="Purchase price (£)" type="number" placeholder="total paid, inc. delivery" value={f.purchase} onChange={set("purchase")} /></div>
             <div className="frow"><Sel label="Status" value={f.status} onChange={set("status")} options={STATUSES} /><Sel label="Location" value={f.location} onChange={set("location")} options={LOCATIONS} /></div>
             <label className="field"><span>Parcel</span><select value={f.shipment} onChange={set("shipment")}><option value="">— none yet —</option>{shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}</select></label>
-            <div className="frow"><F label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} /><F label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} /></div>
-            <div className="frow"><F label="Sale date" type="date" value={f.saleDate} onChange={set("saleDate")} /><F label="Sale channel" placeholder="Avito" value={f.channel} onChange={set("channel")} /></div>
+            {(f.status === "listed" || f.status === "sold") && (
+              <div className="frow"><F label="List price (£)" type="number" value={f.listPrice} onChange={set("listPrice")} />{f.status === "sold" ? <F label="Sale price (£)" type="number" value={f.salePrice} onChange={set("salePrice")} /> : <span />}</div>
+            )}
+            {f.status === "sold" && (
+              <div className="frow"><F label="Sale date" type="date" value={f.saleDate} onChange={set("saleDate")} /><F label="Sale channel" placeholder="Avito" value={f.channel} onChange={set("channel")} /></div>
+            )}
           </Modal>
         );
       }
